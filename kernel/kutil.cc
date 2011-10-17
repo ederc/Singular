@@ -5011,10 +5011,13 @@ void initSL (ideal F, ideal Q,kStrategy strat)
   else i=setmaxT;
   strat->ecartS=initec(i);
   strat->sevS=initsevS(i);
+  strat->sevSig=initsevS(i);
   strat->S_2_R=initS_2_R(i);
   strat->fromQ=NULL;
   strat->Shdl=idInit(i,F->rank);
   strat->S=strat->Shdl->m;
+  // the following step corresponds to a strat->Shdl->m
+  //strat->sig=(poly *)omAlloc0((F->rank)*sizeof(poly));
   /*- put polys into S -*/
   if (Q!=NULL)
   {
@@ -5115,10 +5118,13 @@ void initSSpecial (ideal F, ideal Q, ideal P,kStrategy strat)
   i=((i+IDELEMS(F)+IDELEMS(P)+15)/16)*16;
   strat->ecartS=initec(i);
   strat->sevS=initsevS(i);
+  strat->sevSig=initsevS(i);
   strat->S_2_R=initS_2_R(i);
   strat->fromQ=NULL;
   strat->Shdl=idInit(i,F->rank);
   strat->S=strat->Shdl->m;
+  // the following step corresponds to an strat->Shdl->m
+  //strat->sig=(poly *)omAlloc0((F->rank)*sizeof(poly));
 
   /*- put polys into S -*/
   if (Q!=NULL)
@@ -5659,6 +5665,10 @@ void enterSBba (LObject p,int atS,kStrategy strat, int atR)
                                     IDELEMS(strat->Shdl)*sizeof(unsigned long),
                                     (IDELEMS(strat->Shdl)+setmaxTinc)
                                                   *sizeof(unsigned long));
+    strat->sevSig = (unsigned long*) omRealloc0Size(strat->sevSig,
+                                    IDELEMS(strat->Shdl)*sizeof(unsigned long),
+                                    (IDELEMS(strat->Shdl)+setmaxTinc)
+                                                  *sizeof(unsigned long));
     strat->ecartS = (intset)omReallocSize(strat->ecartS,
                                           IDELEMS(strat->Shdl)*sizeof(int),
                                           (IDELEMS(strat->Shdl)+setmaxTinc)
@@ -5684,9 +5694,13 @@ void enterSBba (LObject p,int atS,kStrategy strat, int atR)
                                     (IDELEMS(strat->Shdl)+setmaxTinc)*sizeof(int));
     }
     pEnlargeSet(&strat->S,IDELEMS(strat->Shdl),setmaxTinc);
+    pEnlargeSet(&strat->sig,IDELEMS(strat->Shdl),setmaxTinc);
     IDELEMS(strat->Shdl)+=setmaxTinc;
     strat->Shdl->m=strat->S;
   }
+  // in a signature-based algorithm the following situation will never
+  // appear due to the fact that the critical pairs are already sorted
+  // by increasing signature.
   if (atS <= strat->sl)
   {
 #ifdef ENTER_USE_MEMMOVE
@@ -5737,12 +5751,14 @@ void enterSBba (LObject p,int atS,kStrategy strat, int atR)
 
   /*- save result -*/
   strat->S[atS] = p.p;
+  strat->sig[atS] = p.p; // TODO: get ths correct signature in here!
   if (strat->honey) strat->ecartS[atS] = p.ecart;
   if (p.sev == 0)
     p.sev = pGetShortExpVector(p.p);
   else
     assume(p.sev == pGetShortExpVector(p.p));
   strat->sevS[atS] = p.sev;
+  strat->sevSig[atS] = p.sev; // TODO: get the correct signature in here!
   strat->ecartS[atS] = p.ecart;
   strat->S_2_R[atS] = atR;
   strat->sl++;
@@ -5978,6 +5994,7 @@ void exitBuchMora (kStrategy strat)
   omFreeSize(strat->sevT, (strat->tmax)*sizeof(unsigned long));
   omFreeSize(strat->ecartS,IDELEMS(strat->Shdl)*sizeof(int));
   omFreeSize((ADDRESS)strat->sevS,IDELEMS(strat->Shdl)*sizeof(unsigned long));
+  omFreeSize((ADDRESS)strat->sevSig,IDELEMS(strat->Shdl)*sizeof(unsigned long));
   omFreeSize(strat->S_2_R,IDELEMS(strat->Shdl)*sizeof(int));
   /*- set L: should be empty -*/
   omFreeSize(strat->L,(strat->Lmax)*sizeof(LObject));
