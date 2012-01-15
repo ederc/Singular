@@ -283,6 +283,7 @@ public:
   intset fromS; // from which S[i] S[j] comes from
                 // this is important for signature-based
                 // algorithms
+  unsigned long currIdx;
   intset lenS;
   wlen_set lenSw; /* for tgb.ccc */
   intset fromQ;
