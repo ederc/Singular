@@ -504,7 +504,7 @@ int redSig (LObject* h,kStrategy strat)
   }
   if (strat->tl<0) return 1;
   //if (h->GetLmTailRing()==NULL) return 0; // HS: SHOULD NOT BE NEEDED!
-  printf("FDEGS: %ld -- %ld\n",h->FDeg, h->pFDeg());
+  //printf("FDEGS: %ld -- %ld\n",h->FDeg, h->pFDeg());
   assume(h->FDeg == h->pFDeg());
 #ifdef DEBUGF5
   Print("------- IN REDSIG -------\n");
@@ -579,8 +579,8 @@ int redSig (LObject* h,kStrategy strat)
     }
 #endif
     assume(strat->fromT == FALSE);
-#if 1
-//#ifdef DEBUGF5
+//#if 1
+#ifdef DEBUGF5
     Print("BEFORE REDUCTION WITH %d:\n",ii);
     Print("--------------------------------\n");
     pWrite(h->sig);
@@ -595,8 +595,8 @@ int redSig (LObject* h,kStrategy strat)
     // if reduction has taken place, i.e. the reduction was sig-safe
     // otherwise start is already at the next position and the loop
     // searching reducers in T goes on from index start
-#if 1
-//#ifdef DEBUGF5
+//#if 1
+#ifdef DEBUGF5
     Print("SigSAFE: %d\n",sigSafe);
 #endif
     if (sigSafe != 3)
@@ -1147,7 +1147,6 @@ ideal bba (ideal F, ideal Q,intvec *w,intvec *hilb,kStrategy strat)
   bba_count++;
   int loop_count = 0;
 #endif /* KDEBUG */
-  int currComp = 0;
   om_Opts.MinTrack = 5;
   int   srmax,lrmax, red_result = 1;
   int   olddeg,reduc;
@@ -1240,11 +1239,11 @@ ideal bba (ideal F, ideal Q,intvec *w,intvec *hilb,kStrategy strat)
     printf("%ld\n",pGetComp(strat->P.sig));
     Print("-------------------------------------------------\n");
 #endif
-    if (strat->incremental && pGetComp(strat->P.sig) != currComp)
+    if (strat->incremental && pGetComp(strat->P.sig) != strat->currIdx)
     {
-      currComp = pGetComp(strat->P.sig);
-      strat->currIdx = strat->sl+1;
-      printf("SL: %ld -- TL: %ld\n",strat->sl,strat->tl);
+      strat->currIdx = pGetComp(strat->P.sig);
+      //strat->currIdx = strat->sl+1;
+      //printf("SL: %ld -- TL: %ld\n",strat->sl,strat->tl);
     }
     if (pNext(strat->P.p) == strat->tail)
     {
@@ -1310,6 +1309,8 @@ ideal bba (ideal F, ideal Q,intvec *w,intvec *hilb,kStrategy strat)
     // reduction to non-zero new poly
 #ifdef DEBUGF5
     Print("RED RESULT: %d\n");
+    pWrite(strat->P.p);
+    pWrite(strat->P.sig);
 #endif
     if (red_result == 1)
     {
