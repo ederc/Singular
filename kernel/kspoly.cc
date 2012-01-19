@@ -239,7 +239,6 @@ int ksReducePolySig(LObject* PR,
             rewCriterion(sigMult,sigMultNegSev,strat,idx+1)
           )
       {
-        printf("yepp!\n");
         sigSafe = 0;
       }
     }
