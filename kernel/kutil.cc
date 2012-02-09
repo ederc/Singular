@@ -7282,7 +7282,7 @@ void initSbaPos (kStrategy strat)
 {
   strat->posInLDependsOnLength = FALSE;
   strat->posInL = posInLSig;
-  strat->posInT = posInTSig;
+  strat->posInT = posInT15;
 }
 
 void initSbaBuchMora (ideal F,ideal Q,kStrategy strat)
