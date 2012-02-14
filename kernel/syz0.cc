@@ -951,6 +951,7 @@ resolvente sySchreyerResolvente(ideal arg, int maxlength, int * length,
   syReOrderResolventFB(res,*length,syzIndex+1);
   if (/*ringOrderChanged:*/ origR!=syRing && syRing != NULL)
   {
+    rWrite(syRing);
     rChangeCurrRing(origR);
     // Thomas: Here I assume that all (!) polys of res live in tmpR
     while ((syzIndex < *length) && (res[syzIndex]))
@@ -1006,7 +1007,6 @@ syStrategy sySchreyer(ideal arg, int maxlength)
   int rl;
   resolvente fr = sySchreyerResolvente(arg,maxlength,&(rl));
   if (fr==NULL) return NULL;
-
   int typ0;
   syStrategy result=(syStrategy)omAlloc0(sizeof(ssyStrategy));
   result->length=rl;
