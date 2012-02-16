@@ -1745,8 +1745,8 @@ void enterOnePairSig (int i, poly p, poly pSig, int from, int ecart, int isFromQ
   // set coeffs of multipliers m1 and m2
   pSetCoeff0(m1, nInit(1));
   pSetCoeff0(m2, nInit(1));
-#if 1
-//#ifdef DEBUGF5
+//#if 1
+#ifdef DEBUGF5
   Print("P1  ");
   pWrite(pHead(p));
   Print("FROM: %d\n", from);
@@ -1763,8 +1763,8 @@ void enterOnePairSig (int i, poly p, poly pSig, int from, int ecart, int isFromQ
   pSigMultNegSev = ~p_GetShortExpVector(pSigMult,currRing);
   sSigMult = currRing->p_Procs->pp_Mult_mm(sSigMult,m2,currRing,last);
   sSigMultNegSev = ~p_GetShortExpVector(sSigMult,currRing);
-#if 1
-//#ifdef DEBUGF5
+//#if 1
+#ifdef DEBUGF5
   Print("----------------\n");
   pWrite(pSigMult);
   pWrite(sSigMult);
@@ -1773,16 +1773,10 @@ void enterOnePairSig (int i, poly p, poly pSig, int from, int ecart, int isFromQ
   // testing by syzCriterion = F5 Criterion testing by rewCriterion =
   // Rewritten Criterion
   if  ( strat->syzCrit(pSigMult,pSigMultNegSev,strat) ||
-        strat->syzCrit(sSigMult,sSigMultNegSev,strat) ||
-        rewCriterion(sSigMult,sSigMultNegSev,strat,i+1)
+        strat->syzCrit(sSigMult,sSigMultNegSev,strat) 
+        || rewCriterion(sSigMult,sSigMultNegSev,strat,i+1)
       )
   {
-  /*
-  if  (
-        rewCriterion(sSigMult,sSigMultNegSev,strat,i+1)
-      )
-  {
-  */
     pDelete(&pSigMult);
     pDelete(&sSigMult);
     strat->cp++;
@@ -4903,22 +4897,22 @@ loop
  */
 BOOLEAN syzCriterion(poly sig, unsigned long not_sevSig, kStrategy strat)
 {
-#if 1
-//#ifdef DEBUGF5
+//#if 1
+#ifdef DEBUGF5
   Print("syzygy criterion checks:  ");
   pWrite(sig);
 #endif
   for (int k=0; k<strat->syzl; k++)
   {
-#if 1
-//#ifdef DEBUGF5
+//#if 1
+#ifdef DEBUGF5
     Print("checking with: %d --  ",k);
     pWrite(pHead(strat->syz[k]));
 #endif
     if (p_LmShortDivisibleBy(strat->syz[k], strat->sevSyz[k], sig, not_sevSig, currRing))
     {
-#if 1
-//#ifdef DEBUGF5
+//#if 1
+#ifdef DEBUGF5
       printf("DELETE!\n");
 #endif
       return TRUE;
@@ -4974,23 +4968,24 @@ BOOLEAN syzCriterionInc(poly sig, unsigned long not_sevSig, kStrategy strat)
  */
 BOOLEAN rewCriterion(poly sig, unsigned long not_sevSig, kStrategy strat, int start)
 {
-#if 1
-//#ifdef DEBUGF5
+//#if 1
+#ifdef DEBUGF5
   printf("rewritten criterion checks:  ");
   pWrite(sig);
 #endif
   for(int k = start; k<strat->sl+1; k++)
   {
-#if 1
-//#ifdef DEBUGF5
+//#if 1
+#ifdef DEBUGF5
     Print("checking with:  ");
     pWrite(strat->sig[k]);
     pWrite(pHead(strat->S[k]));
 #endif
     if (p_LmShortDivisibleBy(strat->sig[k], strat->sevSig[k], sig, not_sevSig, currRing))
+    //if (p_LmEqual(strat->sig[k], sig, currRing))
     {
-#if 1
-//#ifdef DEBUGF5
+//#if 1
+#ifdef DEBUGF5
       printf("DELETE!\n");
 #endif
       return TRUE;
@@ -5694,9 +5689,10 @@ void initSLSba (ideal F, ideal Q,kStrategy strat)
   strat->sig    =   (poly *)omAlloc0(i*sizeof(poly));
   if (!strat->incremental)
   {
-    strat->syz      =   (poly *)omAlloc0(ps*sizeof(poly));
-    strat->sevSyz   =   initsevS(ps);
-    strat->syzl     =   strat->syzmax = ps;
+    strat->syz    = (poly *)omAlloc0(ps*sizeof(poly));
+    strat->sevSyz = initsevS(ps);
+    strat->syzmax = ps;
+    strat->syzl   = 0;
   }
   /*- put polys into S -*/
   if (Q!=NULL)
@@ -5789,6 +5785,7 @@ void initSLSba (ideal F, ideal Q,kStrategy strat)
           enterL(&strat->L,&strat->Ll,&strat->Lmax,h,pos);
         }
       }
+      /*
       if (!strat->incremental)
       {
         for(j=0;j<i;j++)
@@ -5812,7 +5809,9 @@ void initSLSba (ideal F, ideal Q,kStrategy strat)
           strat->sevSyz[ctr] = p_GetShortExpVector(strat->syz[ctr],currRing);
           ctr++;
         }
+        strat->syzl = ps;
       }
+      */
     }
   }
   /*- test, if a unit is in F -*/
@@ -7077,10 +7076,12 @@ void initSbaCrit(kStrategy strat)
   if (strat->incremental)
   {
     strat->syzCrit  = syzCriterionInc;
+    strat->redStep  = ksReducePolySigInc;
   }
   else
   {
     strat->syzCrit  = syzCriterion;
+    strat->redStep  = ksReducePolySig;
   }
 #ifdef HAVE_RINGS
   if (rField_is_Ring(currRing))
