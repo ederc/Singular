@@ -4874,7 +4874,7 @@ static BOOLEAN jjSBA(leftv res, leftv v)
       w=ivCopy(w);
     }
   }
-  result=kSba(v_id,currQuotient,hom,&w,1);
+  result=kSba(v_id,currQuotient,hom,&w,1,0);
   idSkipZeroes(result);
   res->data = (char *)result;
   if(!TEST_OPT_DEGBOUND) setFlag(res,FLAG_STD);
@@ -4900,7 +4900,33 @@ static BOOLEAN jjSBA_1(leftv res, leftv v, leftv u)
       w=ivCopy(w);
     }
   }
-  result=kSba(v_id,currQuotient,hom,&w,(int)(long)u->Data());
+  result=kSba(v_id,currQuotient,hom,&w,(int)(long)u->Data(),0);
+  idSkipZeroes(result);
+  res->data = (char *)result;
+  if(!TEST_OPT_DEGBOUND) setFlag(res,FLAG_STD);
+  if (w!=NULL) atSet(res,omStrDup("isHomog"),w,INTVEC_CMD);
+  return FALSE;
+}
+static BOOLEAN jjSBA_2(leftv res, leftv v, leftv u, leftv t)
+{
+  ideal result;
+  ideal v_id=(ideal)v->Data();
+  intvec *w=(intvec *)atGet(v,"isHomog",INTVEC_CMD);
+  tHomog hom=testHomog;
+  if (w!=NULL)
+  {
+    if (!idTestHomModule(v_id,currQuotient,w))
+    {
+      WarnS("wrong weights");
+      w=NULL;
+    }
+    else
+    {
+      hom=isHomog;
+      w=ivCopy(w);
+    }
+  }
+  result=kSba(v_id,currQuotient,hom,&w,(int)(long)u->Data(),(int)(long)t->Data());
   idSkipZeroes(result);
   res->data = (char *)result;
   if(!TEST_OPT_DEGBOUND) setFlag(res,FLAG_STD);
