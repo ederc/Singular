@@ -87,6 +87,11 @@ public:
   // them and do not need to consider them in the
   // interreduction process
   BOOLEAN is_redundant;
+  // used in sba's sig-safe reduction:
+  // sometimes we already know that a reducer
+  // is sig-safe, so no need for a real
+  // sig-safeness check
+  BOOLEAN is_sigsafe;
 
 
 #ifdef HAVE_PLURAL  
@@ -271,8 +276,6 @@ public:
   kStrategy next;
   int (*red)(LObject * L,kStrategy strat);
   int (*red2)(LObject * L,kStrategy strat);
-  int (*redStep)(LObject* PR, TObject* PW, long idx,
-                 poly spNoether, number *coef, kStrategy strat);
   void (*initEcart)(LObject * L);
   int (*posInT)(const TSet T,const int tl,LObject &h);
   int (*posInLSba)(const LSet set, const int length,
@@ -300,8 +303,6 @@ public:
   polyset S;
   polyset syz;
   polyset sig;
-  // ratio[i] stores sig[i] / S[i]
-  polyset ratio;
   intset ecartS;
   intset fromS; // from which S[i] S[j] comes from
                 // this is important for signature-based
@@ -311,6 +312,7 @@ public:
                 // important for signature-based algorithms
   BOOLEAN incremental;
   unsigned long currIdx;
+  int max_lower_index;
   intset lenS;
   wlen_set lenSw; /* for tgb.ccc */
   intset fromQ;
@@ -321,11 +323,6 @@ public:
   TSet T;
   LSet L;
   LSet    B;
-  // used in sba's sig-safe reduction:
-  // sometimes we already know that a reducer
-  // is sig-safe, so no need for a real
-  // sig-safeness check
-  bitarray* sigsafe;
   poly    kHEdge;
   poly    kNoether;
   poly    t_kHEdge; // same polys in tailring
@@ -669,27 +666,6 @@ int ksReducePoly(LObject* PR,
 //         -1 tailRing change could not be performed due to exceeding exp
 //            bound of currRing
 int ksReducePolySig(LObject* PR,
-                 TObject* PW,
-                 long idx,
-                 poly spNoether = NULL,
-                 number *coef = NULL,
-                 kStrategy strat = NULL);
-
-// Reduces PR with PW
-// Assumes PR != NULL, PW != NULL, Lm(PW) divides Lm(PR)
-// Changes: PR
-// Const:   PW
-// If coef != NULL, then *coef is a/gcd(a,b), where a = LC(PR), b = LC(PW)
-// If strat != NULL, tailRing is changed if reduction would violate exp bound
-// of tailRing
-// Returns: 0 everything ok, no tailRing change
-//          1 tailRing has successfully changed (strat != NULL)
-//          2 no reduction performed, tailRing needs to be changed first
-//            (strat == NULL)
-//          3 no reduction performed, not sig-safe!!!
-//         -1 tailRing change could not be performed due to exceeding exp
-//            bound of currRing
-int ksReducePolySigInc(LObject* PR,
                  TObject* PW,
                  long idx,
                  poly spNoether = NULL,
