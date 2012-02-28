@@ -224,8 +224,8 @@ int ksReducePolySig(LObject* PR,
   // sig-safeness of the reduction step
   pDelete(&f1);
   pDelete(&sigMult);
-//#if 1
-#ifdef DEBUGF5
+#if 1
+//#ifdef DEBUGF5
   printf("SIGSAFE: %d\n",sigSafe);
 #endif
   // go on with the computations only if the signature of p2 is greater than the

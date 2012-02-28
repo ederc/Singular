@@ -1180,8 +1180,11 @@ KINLINE BOOLEAN ratioCmp_dp(int* ratio1, int* ratio2, ring r)
   // corresponding polynomial
   
   // look at the degree difference first
-  if (ratio1[r->N+1] < ratio2[r->N+1])
+  if (ratio1[r->N+1] > ratio2[r->N+1])
     return TRUE;
+  else
+    if (ratio1[r->N+1] > ratio2[r->N+1])
+      return FALSE;
   // look at the entries
   for (int i=r->N; i; i--)
   {
@@ -1202,6 +1205,7 @@ KINLINE BOOLEAN ratioCmp_C_dp(int* ratio1, int* ratio2, ring r)
   // difference between the signature and the leading monomial of the
   // corresponding polynomial
   
+//#if 1
 #ifdef DEBUGF5
   printf("RATIO1: %d | %d | ",ratio1[r->N+1],ratio1[0]);
   for(int ii=1; ii<currRing->N+1;ii++)
@@ -1221,6 +1225,9 @@ KINLINE BOOLEAN ratioCmp_C_dp(int* ratio1, int* ratio2, ring r)
   // look at the degree difference first
   if (ratio1[r->N+1] < ratio2[r->N+1])
     return TRUE;
+  else
+    if (ratio1[r->N+1] > ratio2[r->N+1])
+      return FALSE;
   // look at the entries
   for (int i=r->N; i; i--)
   {

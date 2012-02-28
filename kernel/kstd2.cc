@@ -520,8 +520,8 @@ int redSig (LObject* h,kStrategy strat)
   //if (h->GetLmTailRing()==NULL) return 0; // HS: SHOULD NOT BE NEEDED!
   //printf("FDEGS: %ld -- %ld\n",h->FDeg, h->pFDeg());
   assume(h->FDeg == h->pFDeg());
-//#if 1
-#ifdef DEBUGF5
+#if 1
+//#ifdef DEBUGF5
   Print("------- IN REDSIG -------\n");
   Print("p: ");
   pWrite(pHead(h->p));
@@ -819,7 +819,7 @@ int redSigInc (LObject* h,kStrategy strat)
       // if reduction has taken place, i.e. the reduction was sig-safe
       // otherwise start is already at the next position and the loop
       // searching reducers in T goes on from index start
-      //#if 1
+//#if 1
 #ifdef DEBUGF5
       Print("SigSAFE: %d\n",sigSafe);
 #endif
@@ -1944,7 +1944,7 @@ ideal sba (ideal F0, ideal Q,intvec *w,intvec *hilb,kStrategy strat)
       {
         if (strat->P.lcm!=NULL)
           pLmFree(strat->P.lcm);
-        red_result = 2;;
+        red_result = 2;
       }
       if (errorreported)  break;
     }
@@ -2109,7 +2109,7 @@ ideal sba (ideal F0, ideal Q,intvec *w,intvec *hilb,kStrategy strat)
       //printf("|%d\n\n",strat->P.ratio[currRing->N+1]);
       strat->P.ratio[0]             = p_GetComp(strat->P.sig, currRing);
 #endif
-        enterT(strat->P, strat);
+        enterT(strat->P, strat, strat->tl+1);
 #ifdef HAVE_RINGS
       if (rField_is_Ring(currRing))
         superenterpairs(strat->P.p,strat->sl,strat->P.ecart,pos,strat, strat->tl);
@@ -2742,6 +2742,7 @@ void f5c (kStrategy strat, int& olddeg, int& minimcnt, int& hilbeledeg,
     p_SetComp(strat->L[cd].sig,cc+1,currRing);
     cc++;
   }
+//#if 1
 #if DEBUGF5
   Print("------------------- STRAT S ---------------------\n");
   cc = 0;
