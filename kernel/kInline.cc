@@ -1163,6 +1163,17 @@ KINLINE void clearS (poly p, unsigned long p_sev, int* at, int* k,
   (*k)--;
 }
 
+KINLINE void clearSSba (poly p, unsigned long p_sev, int* at, int* k,
+                    kStrategy strat)
+{
+  assume(p_sev == pGetShortExpVector(p));
+  if (strat->noClearS) return;
+  if (!pLmShortDivisibleBy(p,p_sev, strat->S[*at], ~ strat->sevS[*at])) return;
+  deleteInSSba((*at),strat);
+  (*at)--;
+  (*k)--;
+}
+
 // dummy function for function pointer strat->rewCrit being usable in all
 // possible choices for criteria
 KINLINE BOOLEAN arriRewDummy(poly sig, unsigned long not_sevSig, kStrategy strat, int start=0)
