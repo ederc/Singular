@@ -6010,9 +6010,9 @@ void initSyzRules (kStrategy strat)
   {
     if( strat->S[1] )
     {
-      __omFreeSize(strat->syzIdx,(strat->syzidxmax)*sizeof(int));
-      __omFreeSize(strat->sevSyz,(strat->syzmax)*sizeof(unsigned long));
-      __omFreeSize(strat->syz,(strat->syzmax)*sizeof(poly));
+      omFreeSize(strat->syzIdx,(strat->syzidxmax)*sizeof(int));
+      omFreeSize(strat->sevSyz,(strat->syzmax)*sizeof(unsigned long));
+      omFreeSize(strat->syz,(strat->syzmax)*sizeof(poly));
     }
     int i, j, k, diff, comp, comp_old, ps=0, ctr=0;
     /************************************************************
