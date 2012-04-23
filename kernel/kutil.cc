@@ -7662,26 +7662,26 @@ void exitSba (kStrategy strat)
 {
   /*- release temp data -*/
   cleanT(strat);
-  __omFreeSize(strat->T,(strat->tmax)*sizeof(TObject));
-  __omFreeSize(strat->R,(strat->tmax)*sizeof(TObject*));
-  __omFreeSize(strat->sevT, (strat->tmax)*sizeof(unsigned long));
-  __omFreeSize(strat->ecartS,IDELEMS(strat->Shdl)*sizeof(int));
-  __omFreeSize(strat->fromS,IDELEMS(strat->Shdl)*sizeof(int));
-  __omFreeSize((ADDRESS)strat->sevS,IDELEMS(strat->Shdl)*sizeof(unsigned long));
-  __omFreeSize((ADDRESS)strat->sevSig,IDELEMS(strat->Shdl)*sizeof(unsigned long));
-  __omFreeSize((ADDRESS)strat->syz,(strat->syzmax)*sizeof(poly));
-  __omFreeSize((ADDRESS)strat->sevSyz,(strat->syzmax)*sizeof(unsigned long));
+  omFreeSize(strat->T,(strat->tmax)*sizeof(TObject));
+  omFreeSize(strat->R,(strat->tmax)*sizeof(TObject*));
+  omFreeSize(strat->sevT, (strat->tmax)*sizeof(unsigned long));
+  omFreeSize(strat->ecartS,IDELEMS(strat->Shdl)*sizeof(int));
+  omFreeSize(strat->fromS,IDELEMS(strat->Shdl)*sizeof(int));
+  omFreeSize((ADDRESS)strat->sevS,IDELEMS(strat->Shdl)*sizeof(unsigned long));
+  omFreeSize((ADDRESS)strat->sevSig,IDELEMS(strat->Shdl)*sizeof(unsigned long));
+  omFreeSize((ADDRESS)strat->syz,(strat->syzmax)*sizeof(poly));
+  omFreeSize((ADDRESS)strat->sevSyz,(strat->syzmax)*sizeof(unsigned long));
   if (strat->incremental)
   {
-    __omFreeSize(strat->syzIdx,(strat->syzidxmax)*sizeof(int));
+    omFreeSize(strat->syzIdx,(strat->syzidxmax)*sizeof(int));
   }
-  __omFreeSize(strat->S_2_R,IDELEMS(strat->Shdl)*sizeof(int));
+  omFreeSize(strat->S_2_R,IDELEMS(strat->Shdl)*sizeof(int));
   /*- set L: should be empty -*/
-  __omFreeSize(strat->L,(strat->Lmax)*sizeof(LObject));
+  omFreeSize(strat->L,(strat->Lmax)*sizeof(LObject));
   /*- set B: should be empty -*/
-  __omFreeSize(strat->B,(strat->Bmax)*sizeof(LObject));
+  omFreeSize(strat->B,(strat->Bmax)*sizeof(LObject));
   /*- set sig: no need for the signatures anymore -*/
-  __omFreeSize(strat->sig,IDELEMS(strat->Shdl)*sizeof(poly));
+  omFreeSize(strat->sig,IDELEMS(strat->Shdl)*sizeof(poly));
   pLmDelete(&strat->tail);
   strat->syzComp=0;
   if (strat->kIdeal!=NULL)
