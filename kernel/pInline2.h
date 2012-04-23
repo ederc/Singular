@@ -297,7 +297,7 @@ PINLINE2 long p_GetExpDiff(poly p1, poly p2, int i, ring r)
 PINLINE2 poly p_New(ring r, omBin bin)
 {
   p_CheckRing2(r);
-  pAssume2(bin != NULL && r->PolyBin->sizeW == bin->sizeW);
+  //pAssume2(bin != NULL && r->PolyBin->sizeW == bin->sizeW);
   poly p;
   omTypeAllocBin(poly, p, bin);
   p_SetRingOfLm(p, r);
@@ -479,7 +479,7 @@ PINLINE2 void p_Delete(poly *p,  const ring lmRing, const ring tailRing)
 PINLINE2 poly p_ShallowCopyDelete(poly p, const ring r, omBin bin)
 {
   p_LmCheckPolyRing2(p, r);
-  pAssume2(r->PolyBin->sizeW == bin->sizeW);
+  //pAssume2(r->PolyBin->sizeW == bin->sizeW);
   return r->p_Procs->p_ShallowCopyDelete(p, r, bin);
 }
 

@@ -89,7 +89,8 @@ BOOLEAN p_LmCheckIsFromRing(poly p, ring r)
     else
     #endif
     {
-      pPolyAssumeReturn(omIsBinPageAddr(p) && omSizeWOfAddr(p)==r->PolyBin->sizeW,p,r);
+      //pPolyAssumeReturn(omIsBinPageAddr(p) && 
+      //omSizeWOfAddr(p)==r->PolyBin->sizeW,p,r);
       return TRUE;
     }
     return FALSE;
@@ -109,19 +110,19 @@ BOOLEAN p_CheckIsFromRing(poly p, ring r)
 
 BOOLEAN p_CheckPolyRing(poly p, ring r)
 {
-  pAssumeReturn(r != NULL && r->PolyBin != NULL);
+  //pAssumeReturn(r != NULL && r->PolyBin != NULL);
   return p_CheckIsFromRing(p, r);
 }
 
 BOOLEAN p_LmCheckPolyRing(poly p, ring r)
 {
-  pAssumeReturn(r != NULL && r->PolyBin != NULL);
+  //pAssumeReturn(r != NULL && r->PolyBin != NULL);
   pAssumeReturn(p != NULL);
   return p_LmCheckIsFromRing(p, r);
 }
 BOOLEAN p_CheckRing(ring r)
 {
-  pAssumeReturn(r != NULL && r->PolyBin != NULL);
+  //pAssumeReturn(r != NULL && r->PolyBin != NULL);
   return TRUE;
 }
 
@@ -212,8 +213,9 @@ BOOLEAN _p_Test(poly p, ring r, int level)
 
   #ifndef OM_NDEBUG
   // check addr with level+1 so as to check bin/page of addr
-  pPolyAssumeReturnMsg(omTestBinAddrSize(p, (r->PolyBin->sizeW)*SIZEOF_LONG, level+1)
-                        == omError_NoError, "memory error",p,r);
+  //pPolyAssumeReturnMsg(omTestBinAddrSize(p, (r->PolyBin->sizeW)*SIZEOF_LONG, 
+  //level+1)
+  //                      == omError_NoError, "memory error",p,r);
   #endif
 
   pFalseReturn(p_CheckRing(r));
@@ -221,7 +223,7 @@ BOOLEAN _p_Test(poly p, ring r, int level)
   // this checks that p does not contain a loop: rather expensive O(length^2)
   #ifndef OM_NDEBUG
   if (level > 1)
-    pFalseReturn(omTestList(p, level) == omError_NoError);
+    //pFalseReturn(omTestList(p, level) == omError_NoError);
   #endif
 
   int ismod = p_GetComp(p, r) != 0;
@@ -232,8 +234,9 @@ BOOLEAN _p_Test(poly p, ring r, int level)
     pFalseReturn(p_LmCheckIsFromRing(p, r));
     #ifndef OM_NDEBUG
     // omAddr check
-    pPolyAssumeReturnMsg(omTestBinAddrSize(p, (r->PolyBin->sizeW)*SIZEOF_LONG, 1)
-                     == omError_NoError, "memory error",p,r);
+    //pPolyAssumeReturnMsg(omTestBinAddrSize(p, (r->PolyBin->sizeW)*SIZEOF_LONG, 
+    //1)
+    //                 == omError_NoError, "memory error",p,r);
     #endif
     // number/coef check
     pPolyAssumeReturnMsg(p->coef != NULL || (n_GetChar(r) >= 2), "NULL coef",p,r);
@@ -245,7 +248,8 @@ BOOLEAN _p_Test(poly p, ring r, int level)
     // check for valid comp
     pPolyAssumeReturnMsg(p_GetComp(p, r) >= 0 && (p_GetComp(p, r)<65000), "component out of range ?",p,r);
     // check for mix poly/vec representation
-    pPolyAssumeReturnMsg(ismod == (p_GetComp(p, r) != 0), "mixed poly/vector",p,r);
+    //pPolyAssumeReturnMsg(ismod == (p_GetComp(p, r) != 0), "mixed 
+    //poly/vector",p,r);
 
     // special check for ringorder_s/S
     if ((r->typ!=NULL) && (r->typ[0].ord_typ == ro_syzcomp))

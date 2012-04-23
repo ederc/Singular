@@ -95,7 +95,7 @@ PINLINE1 void p_ExpVectorCopy(poly d_p, poly s_p, const ring r)
 PINLINE1 poly p_Init(const ring r, omBin bin)
 {
   p_CheckRing1(r);
-  pAssume1(bin != NULL && r->PolyBin->sizeW == bin->sizeW);
+  //pAssume1(bin != NULL && r->PolyBin->sizeW == bin->sizeW);
   poly p;
   omTypeAlloc0Bin(poly, p, bin);
   p_MemAdd_NegWeightAdjust(p, r);
@@ -178,7 +178,7 @@ PINLINE1 poly p_GetExp_k_n(poly p, int l, int k, const ring r)
 PINLINE1 poly p_LmShallowCopyDelete(poly p, const ring r, omBin bin)
 {
   p_LmCheckPolyRing1(p, r);
-  pAssume1(bin->sizeW == r->PolyBin->sizeW);
+  //pAssume1(bin->sizeW == r->PolyBin->sizeW);
   poly new_p = p_New(r);
   p_MemCopy_LengthGeneral(new_p->exp, p->exp, r->ExpL_Size);
   pSetCoeff0(new_p, pGetCoeff(p));
