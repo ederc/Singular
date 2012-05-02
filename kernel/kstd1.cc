@@ -13,6 +13,8 @@
 // define if buckets should be used
 #define MORA_USE_BUCKETS
 
+#include "gperftools/profiler.h"
+
 #include <kernel/mod2.h>
 #include <omalloc/omalloc.h>
 
@@ -1712,6 +1714,9 @@ long kHomModDeg(poly p, ring r)
 ideal kStd(ideal F, ideal Q, tHomog h,intvec ** w, intvec *hilb,int syzComp,
           int newIdeal, intvec *vw)
 {
+  // pprof profiling
+  //ProfilerStart("/home/ederc/uni/profiling/ls.prof");
+
   if(idIs0(F))
     return idInit(1,F->rank);
 
@@ -1832,6 +1837,10 @@ ideal kStd(ideal F, ideal Q, tHomog h,intvec ** w, intvec *hilb,int syzComp,
   HCord=strat->HCord;
   delete(strat);
   if ((delete_w)&&(w!=NULL)&&(*w!=NULL)) delete *w;
+
+  // pprof profiling
+  //ProfilerStop();
+
   return r;
 }
 
