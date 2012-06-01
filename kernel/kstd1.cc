@@ -2034,6 +2034,10 @@ ideal kSba(ideal F, ideal Q, tHomog h,intvec ** w, int incremental, int arri, in
 		{
 			r=ssgnoninc(F,Q,NULL,hilb,strat);
 		}
+		if (arri == 4)
+		{
+			r=ssgincschreyer(F,Q,NULL,hilb,strat);
+		}
 		else
 		{
 			r=sba(F,Q,NULL,hilb,strat);
