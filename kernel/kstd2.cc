@@ -2830,6 +2830,10 @@ ideal sba (ideal F0, ideal Q,intvec *w,intvec *hilb,kStrategy strat)
     {
       // get the polynomial (canonicalize bucket, make sure P.p is set)
       strat->P.GetP(strat->lmBin);
+      
+      // sig-safe computations may lead to wrong FDeg computation, thus we need 
+      // to recompute it to make sure everything is alright
+      (strat->P).FDeg = (strat->P).pFDeg();
       // in the homogeneous case FDeg >= pFDeg (sugar/honey)
       // but now, for entering S, T, we reset it
       // in the inhomogeneous case: FDeg == pFDeg
