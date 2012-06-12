@@ -1231,7 +1231,7 @@ EXAMPLE: example modStd; shows an example
       {
          pTest = pTestSB(I,J,L,variant,hi);
       }
-      if((variant == 2) || (variant == 4))
+      if((variant == 2) || (variant == 4) || (variant == 5))
       {
          pTest = pTestSB(I,J,L,variant);
       }
@@ -1323,7 +1323,7 @@ EXAMPLE: example modStd; shows an example
                write(l(i), quote(modpStd(I_for_fork, eval(L[j+i-1]),
                                                      eval(variant), eval(hi))));
             }
-            if((variant == 2) || (variant == 4))
+            if((variant == 2) || (variant == 4) || (variant == 5))
             {
                write(l(i), quote(modpStd(I_for_fork, eval(L[j+i-1]),
                                                      eval(variant))));
