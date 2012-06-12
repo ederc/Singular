@@ -112,7 +112,7 @@ EXAMPLE: example stdfglm; shows an example"
 
   intvec opt = option(get);            //save options
   option(redSB);
-  i = modStd(i);
+  i = modStd(i,2,1,5,5,5);
   option(set,opt);
   setring P;
   return (fglm(Pfglm,i));

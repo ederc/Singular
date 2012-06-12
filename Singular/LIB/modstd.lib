@@ -615,6 +615,7 @@ NOTE:    The procedure computes a standard basis of the ideal I modulo p and
 @*       - variant = 2: groebner,
 @*       - variant = 3: homog. - std(.,#[1]) resp. groebner - dehomog.,
 @*       - variant = 4: fglm.
+@*       - variant = 5: slimgb.
 EXAMPLE: example modpStd; shows an example
 "
 {
@@ -698,6 +699,11 @@ EXAMPLE: example modpStd; shows an example
       i = std(i);
       setring @r;
       i = fglm(R1,i);
+   }
+
+   if(variant == 5)
+   {
+      i = slimgb(i);
    }
 
    setring R0;
@@ -799,6 +805,30 @@ EXAMPLE: example modStd; shows an example
          }
       }
       if(size(#) == 4)
+      {
+         int n1 = #[1];
+         int exactness = #[2];
+         if(n1 >= #[3])
+         {
+            int n2 = n1 + 1;
+         }
+         else
+         {
+            int n2 = #[3];
+         }
+         if(n1 >= #[4])
+         {
+            int n3 = n1;
+         }
+         else
+         {
+            int n3 = #[4];
+         }
+      }
+
+      // do the very same as for size(#) == 4, but set the
+      // variant by #[5] later on!
+      if(size(#) == 5)
       {
          int n1 = #[1];
          int exactness = #[2];
@@ -1018,6 +1048,11 @@ EXAMPLE: example modStd; shows an example
       }
    }
 
+   if (size(#)==5)
+   {
+     variant = #[5];
+   }
+
    list P,T1,T2,T3,LL;
 
    ideal J,K,H;
@@ -1043,7 +1078,7 @@ EXAMPLE: example modStd; shows an example
             write(l(i), quote(modpStd(I_for_fork, eval(L[i + 1]),
                                                   eval(variant), eval(hi))));
          }
-         if((variant == 2) || (variant == 4))
+         if((variant == 2) || (variant == 4) || (variant == 5))
          {
             write(l(i), quote(modpStd(I_for_fork, eval(L[i + 1]),
                                                   eval(variant))));
@@ -1055,7 +1090,7 @@ EXAMPLE: example modStd; shows an example
       {
          P = modpStd(I_for_fork, L[1], variant, hi);
       }
-      if((variant == 2) || (variant == 4))
+      if((variant == 2) || (variant == 4) || (variant == 5))
       {
          P = modpStd(I_for_fork, L[1], variant);
       }
@@ -1103,7 +1138,8 @@ EXAMPLE: example modStd; shows an example
                                                   eval(variant), eval(hi))));
                         j++;
                      }
-                     if((variant == 2) || (variant == 4))
+                     if((variant == 2) || (variant == 4) || (variant == 
+                           5))
                      {
                         write(l(i), quote(modpStd(I_for_fork,
                                                   eval(L[j]), eval(variant))));
@@ -1133,7 +1169,7 @@ EXAMPLE: example modStd; shows an example
             {
                P = modpStd(I, L[j], variant, hi);
             }
-            if((variant == 2) || (variant == 4))
+            if((variant == 2) || (variant == 4) || (variant == 5))
             {
                P = modpStd(I, L[j], variant);
             }
