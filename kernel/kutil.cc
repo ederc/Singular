@@ -5098,7 +5098,7 @@ BOOLEAN faugereRewCriterion(poly sig, unsigned long not_sevSig, kStrategy strat,
 /*
  * REWRITTEN CRITERION for signature-based standard basis algorithms
  ***************************************************************************
- * TODO:This should become the version of Arri/Perry resp. Bjarne/Stillman *
+ * TODO:This should become the version of Arri/Perry resp. Bjarke/Stillman *
  ***************************************************************************
  */
 
@@ -5178,7 +5178,7 @@ BOOLEAN arriRewCriterion(poly sig, unsigned long not_sevSig, kStrategy strat, in
   {
     if (p_LmShortDivisibleBy(strat->sig[ii], strat->sevSig[ii], strat->P.sig, ~strat->P.sevSig, currRing))
     {
-      if (pLmCmp(ppMult_mm(strat->P.sig,pHead(strat->S[ii])),ppMult_mm(strat->sig[ii],strat->P.GetLmCurrRing())) == -1)
+      if (!(pLmCmp(ppMult_mm(strat->P.sig,pHead(strat->S[ii])),ppMult_mm(strat->sig[ii],strat->P.GetLmCurrRing())) == 1))
       {
         strat->P.Delete();
         return TRUE;
