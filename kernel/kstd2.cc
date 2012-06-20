@@ -2975,9 +2975,9 @@ ideal sba (ideal F0, ideal Q,intvec *w,intvec *hilb,kStrategy strat)
 //#if 1
 #if DEBUGF50
     printf("---------------------------\n");
-    Print(" %d. ELEMENT ADDED TO GCURR: ",strat->sl+1);
-    pWrite(pHead(strat->S[strat->sl]));
-    pWrite(strat->sig[strat->sl]);
+    Print(" %d. ELEMENT ADDED TO GCURR:\n",strat->sl+1);
+    Print("LEAD POLY:  "); pWrite(pHead(strat->S[strat->sl]));
+    Print("SIGNATURE:  "); pWrite(strat->sig[strat->sl]);
 #endif
       /*
       if (newrules)
