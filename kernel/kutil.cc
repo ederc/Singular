@@ -5066,7 +5066,7 @@ BOOLEAN faugereRewCriterion(poly sig, unsigned long not_sevSig, kStrategy strat,
   pWrite(sig);
 #endif
   //for(int k = start; k<strat->sl+1; k++)
-  for(int k = strat->sl; k>start+1; k--)
+  for(int k = strat->sl; k>start; k--)
   {
 //#if 1
 #ifdef DEBUGF5
