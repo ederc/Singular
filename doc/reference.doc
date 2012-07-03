@@ -180,6 +180,7 @@ and @code{LIB} no brackets are allowed.
 * resultant::
 * ringlist::
 * rvar::
+* sba::
 * setring::
 * simplex::
 * simplify::
