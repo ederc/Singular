@@ -757,8 +757,6 @@ RETURN:   the integral closure of I, ... I^#[1]. If # is not given, compute
     for (k=1;k<=pow;k++)
     {
       image=images[j]-jet(images[j],k-1,tw);
-      image;
-      k;
       pHelp  = var(nvars(basering))^k;
       image  = image/pHelp;
       if (image<>0)
@@ -872,8 +870,10 @@ EXAMPLE:  example normalI; shows an example
   {
     "// We start with the Rees Algebra of I:";
   }
-
+  int tt;
+  tt = timer;
   list Rees = ReesAlgebra(I);
+  sprintf("ReesAlgebra:   %s",timer-tt);
   def R(1)=Rees[1];
   def Kxt=Rees[2];
   setring R(1);
@@ -894,7 +894,9 @@ EXAMPLE:  example normalI; shows an example
   // rators, the last entry is the 'universal' denominator
 
   setring Kxt;
+  tt = timer;
   list images = ClosureRees(Rees);
+  sprintf("ClosureRees:   %s",timer-tt);
 
   // ClosureRees was done after the first HomJJ-call
   // ==> I is integrally closed, and images consists of the only entry "closed"
@@ -922,7 +924,9 @@ EXAMPLE:  example normalI; shows an example
   // closure of I and its powers, depending on # (in fact, they will
   // not be real fractions, of course). This is done in ClosurePower.
 
+  tt=timer;
   list result = ClosurePower(images,#);
+  sprintf("ClosurePower:  %s",timer-tt);
 
   // finally fetch the result to the old basering
 
@@ -960,11 +964,16 @@ EXAMPLE:  example normalI; shows an example
       def oldring = basering;
       int k;
       ideal m = maxideal(1);
+      int tt;
+      tt=timer;
       list l   = ReesAlgebra(i);
+  sprintf("ReesAlgebra:   %s",timer-tt);
       def rees = l[1];
       def kxt  = l[2];
       setring rees;
+      tt=timer;
       list ll = normal(ker,"isPrim");
+  sprintf("Normalization: %s",timer-tt);
       list lll;
       for(k=1;k<=size(ll[2][1]);k++)
       {
@@ -980,7 +989,9 @@ EXAMPLE:  example normalI; shows an example
       }
       map f = rees,m,tI;
       list L = f(lll);
+      tt=timer;
       list closL = ClosurePower(L,#);
+  sprintf("ClosurePower:  %s",timer-tt);
       ideal normI = I;
       for(k=1;k<=size(closL);k++)
       {
