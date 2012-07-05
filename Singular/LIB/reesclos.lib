@@ -116,7 +116,7 @@ RETURN:   quotients of elements of k[x,t] representing generators of the
   setring R(1);                   // declaration of variables used later
   ideal ker(1)=ker;               // in STEP 2
   poly p;
-
+  int printhomjj = 0;
   // some auxiliary variables
 
   int i=1;         // counts the number of steps to reach the closure of R(1)
@@ -206,7 +206,17 @@ RETURN:   quotients of elements of k[x,t] representing generators of the
 
     list RR=SM[1],SM[2],JM[2],SL[1];
     RS=HomJJ(RR);
-
+    if(printhomjj)
+    {
+      print("HomJJ done");
+      def helpring = basering;
+      def rsring = RS[1];
+      setring rsring;
+      RS;
+      endid;
+      endphi;
+      setring helpring;
+    }
     if (RS[2]==1)             // we've reached the integral closure
     {
       if (dblvl>0)
@@ -346,7 +356,6 @@ RETURN:   quotients of elements of k[x,t] representing generators of the
 
   // at the end: go back to the original basering and construct gene-
   // rators of the closure of I
-
   setring Kxt;
   map psi=R(1),mapI;              // from ReesAlgebra: the map Rees->Kxt
 
@@ -631,7 +640,6 @@ RETURN:   quotients of elements of k[x,t] representing generators of the
 
   // at the end: go back to the original basering and construct gene-
   // rators of the closure of I
-
   setring Kxt;
   map psi=R(1),mapI;              // from ReesAlgebra: the map Rees->Kxt
 
@@ -877,7 +885,6 @@ EXAMPLE:  example normalI; shows an example
   def R(1)=Rees[1];
   def Kxt=Rees[2];
   setring R(1);
-
   if (dblvl>0)
   {
     R(1);
@@ -925,6 +932,8 @@ EXAMPLE:  example normalI; shows an example
   // not be real fractions, of course). This is done in ClosurePower.
 
   tt=timer;
+  ideal redImages;
+  //interred(redImages);
   list result = ClosurePower(images,#);
   sprintf("ClosurePower:  %s",timer-tt);
 
@@ -946,7 +955,7 @@ example
 
 ////////////////////////////////////////////////////////////////////////////
 
-proc normalizeI(ideal i, list #)
+proc normalizeI(ideal I, list #)
 "USAGE:    normalizeI (I [,p[,r]]); I an ideal, p and r optional integers
 RETURN:   the integral closure of I, ..., I^p, where I is an ideal in the
           polynomial ring R=k[x(1),...x(n)]. If p is not given, or p==0,
@@ -964,41 +973,49 @@ EXAMPLE:  example normalI; shows an example
       def oldring = basering;
       int k;
       ideal m = maxideal(1);
-      int tt;
-      tt=timer;
-      list l   = ReesAlgebra(i);
-  sprintf("ReesAlgebra:   %s",timer-tt);
+      int tt  = timer;
+      // compute rees algebra w.r.t. i
+      list l  = ReesAlgebra(I);
+      sprintf("ReesAlgebra:   %s",timer-tt);
       def rees = l[1];
       def kxt  = l[2];
       setring rees;
-      tt=timer;
+      tt = timer;
+      // compute the normalization of the rees algebra, i.e. the
+      // integral closure w.r.t. its field of fractions
+      // NOTE:  we use the option "isPrim" in order to speed up
+      //        computations by not executing equidimensional
+      //        decomposition at the beginning of the normalization
+      //        process.
       list ll = normal(ker,"isPrim");
-  sprintf("Normalization: %s",timer-tt);
+      sprintf("Normalization: %s",timer-tt);
       list lll;
-      for(k=1;k<=size(ll[2][1]);k++)
+      for(k=1; k<=size(ll[2][1]); k++)
       {
            lll[k] = ll[2][1][k];
       }
       setring kxt;
-      ideal I = fetch(r,i);
-      ideal m = fetch(r,m);
-      ideal tI;
-      for(k=1;k<=ncols(I);k++)
-      {
-           tI[k] = t*I[k];
-      }
-      map f = rees,m,tI;
-      list L = f(lll);
-      tt=timer;
+      ideal Ikxt  = fetch(r,I);
+      map f       = rees,mapI; // mapI generated in ReesAlgebra()
+      list L      = f(lll);
+      tt          = timer;
+      
+      // compute the integral closures of I
       list closL = ClosurePower(L,#);
-  sprintf("ClosurePower:  %s",timer-tt);
-      ideal normI = I;
-      for(k=1;k<=size(closL);k++)
+      sprintf("ClosurePower:  %s",timer-tt);
+
+      // compute and interreduce integral closures of I up to the given
+      // degree bound
+      list LL;
+      LL[1] = interred(Ikxt + closL[1]);
+      for(k=2; k<=size(closL); k++)
       {
-           normI = normI + closL[k];
+         LL[k] = interred(Ikxt * LL[k-1] + closL[k]);
       }
+      int sizeLL = size(LL);
+      // go back to original ring
       setring r;
-      return(interred(fetch(kxt,normI)));
+      return(fetch(kxt,LL));
 }
 /*
 LIB"reesclos.lib";
