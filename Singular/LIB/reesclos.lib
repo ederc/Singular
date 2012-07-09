@@ -933,7 +933,6 @@ EXAMPLE:  example normalI; shows an example
 
   tt=timer;
   ideal redImages;
-  //interred(redImages);
   list result = ClosurePower(images,#);
   sprintf("ClosurePower:  %s",timer-tt);
 
