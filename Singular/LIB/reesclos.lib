@@ -20,6 +20,8 @@ PROCEDURES:
 
 LIB "normal.lib";       // for HomJJ
 LIB "standard.lib";     // for groebner
+LIB "monomialideal.lib"; // for testing if ideal is monomial and compute
+                         // the integral closure using geometry
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -954,6 +956,89 @@ example
 
 ////////////////////////////////////////////////////////////////////////////
 
+static proc intClosMonIdealPolymake(ideal I, list #)
+"USAGE:    intClosMonIdealPolymake(I [,p[,r]]); I an ideal, p and r optional integers
+RETURN:   the integral closure of I, ..., I^p, where I is a monomial ideal in the
+          polynomial ring R=k[x(1),...x(n)]. If p is not given, or p==0,
+          compute the closure of I only.
+          For the computation we use Polymake: We generate a cone out of
+          the exponent vectors of the generators of I and compute then a
+          Hilbert basis of this cone. This is much faster than the usual
+          Rees Algebra attempt.
+DISPLAY:  The procedure displays more comments for higher printlevel.
+EXAMPLE:  example normalI; shows an example
+"
+{
+  intmat n;
+  list L, closL;
+  ideal G, closG;
+  intvec v;
+  cone c;
+  string s;
+  int d, i, j, k, l, colnr, rownr;
+  if(size(#)>0)
+  {
+    d = #[1];
+  }
+  else
+  {
+    d = 1;
+  }
+  for(l=1; l<=d; l++)
+  {
+    G = I^l;
+    colnr = nvars(basering) + 1;
+    rownr = size(G) + nvars(basering);
+    intmat m[rownr][colnr];
+    for (k=1; k<=size(G); k++)
+    {
+      v = leadexp(G[k]),1;
+      L[k] = v;
+    }
+    // Next we make v the zero vector of the correct
+    // dimension for computing the canonical generators
+    // (1,0,..,0) to (0,..,0,1,0) easily
+    v = v - L[size(L)];
+    for (k=1; k<=nvars(basering); k++)
+    {
+      v[k]          = 1;
+      L[k+size(G)]  = v;
+      v[k]          = 0;
+    }
+    for (k=1; k<=size(L); k++)
+    {
+      s = s + string(L[k]);
+      if (k<size(L))
+      {
+        s = s + ",";
+      }
+    }
+    execute("m = "+s+";");
+    c = coneViaPoints(m);
+    n = Polymake::hilbertBasis(c);
+    // the first nvars(basering) rows of n are the canonical vectors
+    // we added to m in order to embedd the cone c correctly
+    // => we do not need them for the integral closure of i at all
+    for(k=nvars(basering)+1; k<=nrows(n); k++)
+    {
+      i         = k - nvars(basering);
+      closG[i]  = 1;
+      for(j=1; j<ncols(n); j++)
+      {
+        closG[i] = closG[i] * var(j)^(n[k,j]);
+      }
+    }
+    // reset values for next round
+    closL[l]  = closG;
+    closG     = 1;
+    s         = "";
+    kill m;
+  }
+  return(closL);
+}
+
+////////////////////////////////////////////////////////////////////////////
+
 proc normalizeI(ideal I, list #)
 "USAGE:    normalizeI (I [,p[,r]]); I an ideal, p and r optional integers
 RETURN:   the integral closure of I, ..., I^p, where I is an ideal in the
@@ -969,52 +1054,58 @@ DISPLAY:  The procedure displays more comments for higher printlevel.
 EXAMPLE:  example normalI; shows an example
 "
 {
-      def oldring = basering;
-      int k;
-      ideal m = maxideal(1);
-      int tt  = timer;
-      // compute rees algebra w.r.t. i
-      list l  = ReesAlgebra(I);
-      sprintf("ReesAlgebra:   %s",timer-tt);
-      def rees = l[1];
-      def kxt  = l[2];
-      setring rees;
-      tt = timer;
-      // compute the normalization of the rees algebra, i.e. the
-      // integral closure w.r.t. its field of fractions
-      // NOTE:  we use the option "isPrim" in order to speed up
-      //        computations by not executing equidimensional
-      //        decomposition at the beginning of the normalization
-      //        process.
-      list ll = normal(ker,"isPrim");
-      sprintf("Normalization: %s",timer-tt);
-      list lll;
-      for(k=1; k<=size(ll[2][1]); k++)
-      {
-           lll[k] = ll[2][1][k];
-      }
-      setring kxt;
-      ideal Ikxt  = fetch(r,I);
-      map f       = rees,mapI; // mapI generated in ReesAlgebra()
-      list L      = f(lll);
-      tt          = timer;
-      
-      // compute the integral closures of I
-      list closL = ClosurePower(L,#);
-      sprintf("ClosurePower:  %s",timer-tt);
+  // NOTE:  The test if Polymake is available is just a hack right now
+  //        Once the interface to Polymake is settled we need to fix this
+  if(system("sh","test -e polymake.so") == 0 and isMonomial(I) == 1)
+  {
+    return(intClosMonIdealPolymake(I,#));
+  }
+  def oldring = basering;
+  int k;
+  ideal m = maxideal(1);
+  int tt  = timer;
+  // compute rees algebra w.r.t. i
+  list l  = ReesAlgebra(I);
+  sprintf("ReesAlgebra:   %s",timer-tt);
+  def rees = l[1];
+  def kxt  = l[2];
+  setring rees;
+  tt = timer;
+  // compute the normalization of the rees algebra, i.e. the
+  // integral closure w.r.t. its field of fractions
+  // NOTE:  we use the option "isPrim" in order to speed up
+  //        computations by not executing equidimensional
+  //        decomposition at the beginning of the normalization
+  //        process.
+  list ll = normal(ker,"isPrim");
+  sprintf("Normalization: %s",timer-tt);
+  list lll;
+  for(k=1; k<=size(ll[2][1]); k++)
+  {
+    lll[k] = ll[2][1][k];
+  }
+  setring kxt;
+  ideal Ikxt  = fetch(r,I);
+  map f       = rees,mapI; // mapI generated in ReesAlgebra()
+  list L      = f(lll);
+  tt          = timer;
 
-      // compute and interreduce integral closures of I up to the given
-      // degree bound
-      list LL;
-      LL[1] = interred(Ikxt + closL[1]);
-      for(k=2; k<=size(closL); k++)
-      {
-         LL[k] = interred(Ikxt * LL[k-1] + closL[k]);
-      }
-      int sizeLL = size(LL);
-      // go back to original ring
-      setring r;
-      return(fetch(kxt,LL));
+  // compute the integral closures of I
+  list closL = ClosurePower(L,#);
+  sprintf("ClosurePower:  %s",timer-tt);
+
+  // compute and interreduce integral closures of I up to the given
+  // degree bound
+  list LL;
+  LL[1] = interred(Ikxt + closL[1]);
+  for(k=2; k<=size(closL); k++)
+  {
+    LL[k] = interred(Ikxt * LL[k-1] + closL[k]);
+  }
+  int sizeLL = size(LL);
+  // go back to original ring
+  setring r;
+  return(fetch(kxt,LL));
 }
 /*
 LIB"reesclos.lib";
