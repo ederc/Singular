@@ -1884,6 +1884,7 @@ void enterOnePairSig (int i, poly p, poly pSig, int from, int ecart, int isFromQ
     Lp.sig    = sSigMult;
     Lp.sevSig = ~sSigMultNegSev;
   }
+//#if 1
 #if DEBUGF5
   printf("SIGNATURE OF PAIR:  ");
   pWrite(Lp.sig);
@@ -4507,27 +4508,28 @@ loop
 *to the ordering-procedure pComp
 */
 int posInL0 (const LSet set, const int length,
-            LObject* p,const kStrategy strat)
+             LObject* p,const kStrategy strat)
 {
-if (length<0) return 0;
-if (pLmCmp(set[length].sig,p->sig)== pOrdSgn)
-  return length+1;
+  if (length<0) return 0;
 
-int i;
-int an = 0;
-int en= length;
-loop
-{
-  if (an >= en-1)
+  if (pLmCmp(set[length].p,p->p)== pOrdSgn)
+    return length+1;
+
+  int i;
+  int an = 0;
+  int en= length;
+  loop
   {
-    if (pLmCmp(set[an].sig,p->sig) == pOrdSgn) return en;
-    return an;
+    if (an >= en-1)
+    {
+      if (pLmCmp(set[an].p,p->p) == pOrdSgn) return en;
+      return an;
+    }
+    i=(an+en) / 2;
+    if (pLmCmp(set[i].p,p->p) == pOrdSgn) an=i;
+    else                                 en=i;
+    /*aend. fuer lazy == in !=- machen */
   }
-  i=(an+en) / 2;
-  if (pLmCmp(set[i].sig,p->sig) == pOrdSgn) an=i;
-  else                                      en=i;
-  /*aend. fuer lazy == in !=- machen */
-}
 }
 
 /*2
@@ -4552,8 +4554,7 @@ int posInLSig (const LSet set, const int length,
             LObject* p,const kStrategy strat)
 {
 if (length<0) return 0;
-
-if (pLmCmp(set[length].p,p->p)== pOrdSgn)
+if (pLmCmp(set[length].sig,p->sig)== pOrdSgn)
   return length+1;
 
 int i;
@@ -4563,12 +4564,12 @@ loop
 {
   if (an >= en-1)
   {
-    if (pLmCmp(set[an].p,p->p) == pOrdSgn) return en;
+    if (pLmCmp(set[an].sig,p->sig) == pOrdSgn) return en;
     return an;
   }
   i=(an+en) / 2;
-  if (pLmCmp(set[i].p,p->p) == pOrdSgn) an=i;
-  else                                 en=i;
+  if (pLmCmp(set[i].sig,p->sig) == pOrdSgn) an=i;
+  else                                      en=i;
   /*aend. fuer lazy == in !=- machen */
 }
 }

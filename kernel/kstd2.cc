@@ -2700,8 +2700,9 @@ ideal sba (ideal F0, ideal Q,intvec *w,intvec *hilb,kStrategy strat)
         && (strat->L[strat->Ll].p1!=NULL) && (strat->L[strat->Ll].p2!=NULL)
         && ((strat->honey && (strat->L[strat->Ll].ecart+pFDeg(strat->L[strat->Ll].p,currRing)>Kstd1_deg))
             || ((!strat->honey) && (pFDeg(strat->L[strat->Ll].p,currRing)>Kstd1_deg)))
-        )
+        ) {
         deleteInL(strat->L,&strat->Ll,strat->Ll,strat);
+      }
       if (strat->Ll<0) break;
       else strat->noClearS=TRUE;
     }
@@ -2976,8 +2977,20 @@ ideal sba (ideal F0, ideal Q,intvec *w,intvec *hilb,kStrategy strat)
 #if DEBUGF50
     printf("---------------------------\n");
     Print(" %d. ELEMENT ADDED TO GCURR:\n",strat->sl+1);
-    Print("LEAD POLY:  "); pWrite(pHead(strat->S[strat->sl]));
+    Print("LEAD POLY:  "); pWrite(strat->S[strat->sl]);
     Print("SIGNATURE:  "); pWrite(strat->sig[strat->sl]);
+  Print("------------------- STRAT L ---------------------\n");
+  int cc = 0;
+  while (cc<strat->Ll+1)
+  {
+    pWrite(pHead(strat->L[cc].p));
+    pWrite(pHead(strat->L[cc].p1));
+    pWrite(pHead(strat->L[cc].p2));
+    pWrite(strat->L[cc].sig);
+    printf("- - - - - -\n");
+    cc++;
+  }
+  Print("-------------------------------------------------\n");
 #endif
       /*
       if (newrules)
