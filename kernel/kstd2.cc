@@ -41,7 +41,7 @@
 //#define DEBUGF5 1
 #endif
 
-#define F5C       1
+#define F5C       0
 #if F5C
   #define F5CTAILRED 0
 #endif
@@ -2793,7 +2793,7 @@ ideal sba (ideal F0, ideal Q,intvec *w,intvec *hilb,kStrategy strat)
       pWrite(strat->P.p);
 #endif
       /* reduction of the element choosen from L */
-      if (!strat->rewCrit2(strat->P.sig, ~strat->P.sevSig, strat, strat->P.checked+1))
+      if (!strat->rewCrit2(strat->P.sig, ~strat->P.sevSig, strat, strat->P.checked))
         red_result = strat->red(&strat->P,strat);
       else
       {
@@ -2973,12 +2973,14 @@ ideal sba (ideal F0, ideal Q,intvec *w,intvec *hilb,kStrategy strat)
         enterpairsSig(strat->P.p,strat->P.sig,strat->sl+1,strat->sl,strat->P.ecart,pos,strat, strat->tl);
       // posInS only depends on the leading term
       strat->enterS(strat->P, pos, strat, strat->tl);
-//#if 1
-#if DEBUGF50
-    printf("---------------------------\n");
-    Print(" %d. ELEMENT ADDED TO GCURR:\n",strat->sl+1);
-    Print("LEAD POLY:  "); pWrite(strat->S[strat->sl]);
+#if 1
+//#if DEBUGF50
+    //printf("---------------------------\n");
+    //Print(" %d. ELEMENT ADDED TO GCURR:\n",strat->sl+1);
+    //Print("LEAD POLY:  "); pWrite(strat->S[strat->sl]);
     Print("SIGNATURE:  "); pWrite(strat->sig[strat->sl]);
+#endif
+#if DEBUGF50
   Print("------------------- STRAT L ---------------------\n");
   int cc = 0;
   while (cc<strat->Ll+1)
@@ -3139,7 +3141,7 @@ ideal sba (ideal F0, ideal Q,intvec *w,intvec *hilb,kStrategy strat)
     oo++;
   }
 #endif
-  printf("ZERO REDUCTIONS: %ld\n",zeroreductions);
+  //printf("ZERO REDUCTIONS: %ld\n",zeroreductions);
   zeroreductions  = 0;
   return (strat->Shdl);
 }
