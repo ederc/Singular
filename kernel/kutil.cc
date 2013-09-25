@@ -1815,9 +1815,6 @@ void enterOnePairSig (int i, poly p, poly pSig, int from, int ecart, int isFromQ
   pSigMultNegSev = ~p_GetShortExpVector(pSigMult,currRing);
   sSigMult = currRing->p_Procs->pp_Mult_mm(sSigMult,m2,currRing,last);
   sSigMultNegSev = ~p_GetShortExpVector(sSigMult,currRing);
-  
-  pDelete (&m1);
-  pDelete (&m2);
 
 //#if 1
 #ifdef DEBUGF5
@@ -1884,6 +1881,26 @@ void enterOnePairSig (int i, poly p, poly pSig, int from, int ecart, int isFromQ
     Lp.sig    = sSigMult;
     Lp.sevSig = ~sSigMultNegSev;
   }
+
+// adds buchberger's first criterion
+#if SBA_BUCHBERGER_PROD_CRIT
+//#if 1
+  if (pLmCmp(m2,pHead(p)) == 0) {
+    printf("PRODUCT CRITERION -- ENTER NEW SYZYGY SIGNATURE\n");
+    enterSyz(Lp, strat);
+    // printf("!!!!   EQUAL SIGS   !!!!\n");
+    // pSig = sSig, delete element due to Rewritten Criterion
+    strat->cp++;
+    pDelete(&pSigMult);
+    pDelete(&sSigMult);
+    pLmFree(Lp.lcm);
+    Lp.lcm=NULL;
+    return;
+  }
+#endif
+  
+  pDelete (&m1);
+  pDelete (&m2);
 //#if 1
 #if DEBUGF5
   printf("SIGNATURE OF PAIR:  ");

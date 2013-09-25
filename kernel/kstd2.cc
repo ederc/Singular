@@ -33,6 +33,9 @@
 #define PLURAL_INTERNAL_DECLARATIONS 1
 #endif
 
+/***********************************************
+ * SBA stuff -- start
+***********************************************/
 #define DEBUGF50  0
 #define DEBUGF51  0
 
@@ -45,6 +48,14 @@
 #if F5C
   #define F5CTAILRED 0
 #endif
+
+#define SBA_BUCHBERGER_PROD_CRIT      1
+#define PRINT_NUMBER_ZERO_REDUCTIONS  1
+#define PRINT_SIZE_G                  1
+#define PRINT_SIZE_SYZ                1
+/***********************************************
+ * SBA stuff -- done
+***********************************************/
 
 #include <kernel/kutil.h>
 #include <kernel/options.h>
@@ -73,6 +84,8 @@
 #include <algorithm>
 
 long zeroreductions = 0;
+long size_g         = 0;
+long size_syz    = 0;
 
   int (*test_PosInT)(const TSet T,const int tl,LObject &h);
   int (*test_PosInL)(const LSet set, const int length,
@@ -3093,7 +3106,9 @@ ideal sba (ideal F0, ideal Q,intvec *w,intvec *hilb,kStrategy strat)
 #endif
   }
   else if (TEST_OPT_PROT) PrintLn();
-
+  
+  size_g   = strat->sl+1;
+  size_syz = strat->syzl+1;
   exitSba(strat);
   if (TEST_OPT_WEIGHTM)
   {
@@ -3141,8 +3156,18 @@ ideal sba (ideal F0, ideal Q,intvec *w,intvec *hilb,kStrategy strat)
     oo++;
   }
 #endif
-  //printf("ZERO REDUCTIONS: %ld\n",zeroreductions);
+#if PRINT_NUMBER_ZERO_REDUCTIONS
+  printf("ZERO REDUCTIONS:   %ld\n",zeroreductions);
+#endif
+#if PRINT_SIZE_G
+  printf("SIZE OF G:         %ld\n",size_g);
+#endif
+#if PRINT_SIZE_SYZ
+  printf("SIZE OF SYZ:       %ld\n",size_syz);
+#endif
   zeroreductions  = 0;
+  size_g          = 0;
+  size_syz        = 0;
   return (strat->Shdl);
 }
 
