@@ -49,10 +49,17 @@
   #define F5CTAILRED 0
 #endif
 
-#define SBA_BUCHBERGER_PROD_CRIT      1
-#define PRINT_NUMBER_ZERO_REDUCTIONS  1
-#define PRINT_SIZE_G                  1
-#define PRINT_SIZE_SYZ                1
+#define SBA_PROD_CRIT                   1
+#define PRINT_NUMBER_ZERO_REDUCTIONS    1
+#define PRINT_SIZE_G                    1
+#define PRINT_SIZE_SYZ                  1
+#define PRINT_NUMBER_PRODUCT_CRITERION  1
+#define PRINT_TIMINGS                   1
+
+long zeroreductions     = 0;
+long product_criterion  = 0;
+long size_g             = 0;
+long size_syz           = 0;
 /***********************************************
  * SBA stuff -- done
 ***********************************************/
@@ -82,10 +89,6 @@
 #include <vector>
 #include <list>
 #include <algorithm>
-
-long zeroreductions = 0;
-long size_g         = 0;
-long size_syz    = 0;
 
   int (*test_PosInT)(const TSet T,const int tl,LObject &h);
   int (*test_PosInL)(const LSet set, const int length,
@@ -2621,6 +2624,7 @@ ideal sba (ideal F0, ideal Q,intvec *w,intvec *hilb,kStrategy strat)
       F = idrMoveR (F0, currRingOld);
     }
   }
+	startTimer();
 #if 0
   printf("SBA COMPUTATIONS DONE IN THE FOLLOWING RING:\n");
   rWrite (currRing);
@@ -2806,10 +2810,21 @@ ideal sba (ideal F0, ideal Q,intvec *w,intvec *hilb,kStrategy strat)
       pWrite(strat->P.p);
 #endif
       /* reduction of the element choosen from L */
-      if (!strat->rewCrit2(strat->P.sig, ~strat->P.sevSig, strat, strat->P.checked))
-        red_result = strat->red(&strat->P,strat);
-      else
-      {
+      if (!strat->rewCrit2(strat->P.sig, ~strat->P.sevSig, strat, strat->P.checked)) {
+#if SBA_PROD_CRIT
+        if (strat->P.prod_crit == 1) {
+          product_criterion++;
+          enterSyz(strat->P, strat);
+          if (strat->P.lcm!=NULL)
+            pLmFree(strat->P.lcm);
+          red_result = 2;
+        } else {
+          red_result = strat->red(&strat->P,strat);
+        }
+#else
+      red_result = strat->red(&strat->P,strat);
+#endif
+      } else {
         if (strat->P.lcm!=NULL)
           pLmFree(strat->P.lcm);
         red_result = 2;
@@ -2986,14 +3001,14 @@ ideal sba (ideal F0, ideal Q,intvec *w,intvec *hilb,kStrategy strat)
         enterpairsSig(strat->P.p,strat->P.sig,strat->sl+1,strat->sl,strat->P.ecart,pos,strat, strat->tl);
       // posInS only depends on the leading term
       strat->enterS(strat->P, pos, strat, strat->tl);
-#if 1
-//#if DEBUGF50
+//#if 1
+#if DEBUGF50
     //printf("---------------------------\n");
     //Print(" %d. ELEMENT ADDED TO GCURR:\n",strat->sl+1);
-    //Print("LEAD POLY:  "); pWrite(strat->S[strat->sl]);
+    Print("------------------------------------------ LEAD POLY:  "); pWrite(pHead(strat->S[strat->sl]));
     Print("SIGNATURE:  "); pWrite(strat->sig[strat->sl]);
 #endif
-#if DEBUGF50
+#if 0
   Print("------------------- STRAT L ---------------------\n");
   int cc = 0;
   while (cc<strat->Ll+1)
@@ -3049,6 +3064,7 @@ ideal sba (ideal F0, ideal Q,intvec *w,intvec *hilb,kStrategy strat)
 //#if 1
 #ifdef DEBUGF5
         Print("ADDING STUFF TO SYZ :  ");
+        Print("PROD_CRIT:  %d\n",strat->P.prod_crit);
         pWrite(strat->P.p);
         pWrite(strat->P.sig);
 #endif
@@ -3156,6 +3172,7 @@ ideal sba (ideal F0, ideal Q,intvec *w,intvec *hilb,kStrategy strat)
     oo++;
   }
 #endif
+  int time_sba  = getTimer();
 #if PRINT_NUMBER_ZERO_REDUCTIONS
   printf("ZERO REDUCTIONS:   %ld\n",zeroreductions);
 #endif
@@ -3165,9 +3182,17 @@ ideal sba (ideal F0, ideal Q,intvec *w,intvec *hilb,kStrategy strat)
 #if PRINT_SIZE_SYZ
   printf("SIZE OF SYZ:       %ld\n",size_syz);
 #endif
-  zeroreductions  = 0;
-  size_g          = 0;
-  size_syz        = 0;
+#if PRINT_NUMBER_PRODUCT_CRITERION
+  printf("PRODUCT CRITERIA:  %ld\n",product_criterion);
+#endif
+#if PRINT_TIMINGS
+  printf("TIME:              %ld\n",time_sba);
+#endif
+  zeroreductions    = 0;
+  size_g            = 0;
+  size_syz          = 0;
+  product_criterion = 0;
+  time_sba          = 0;
   return (strat->Shdl);
 }
 

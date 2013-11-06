@@ -34,6 +34,8 @@
 //#define DEBUGF5 1
 #endif
 
+#define DEBUGF50  0
+
 #ifdef HAVE_RINGS
 #include <kernel/ideals.h>
 #endif
@@ -1835,6 +1837,9 @@ void enterOnePairSig (int i, poly p, poly pSig, int from, int ecart, int isFromQ
     strat->cp++;
     pLmFree(Lp.lcm);
     Lp.lcm=NULL;
+    
+    pDelete (&m1);
+    pDelete (&m2);
     return;
   }
   // in any case Lp is checked up to the next strat->P which is added
@@ -1860,6 +1865,9 @@ void enterOnePairSig (int i, poly p, poly pSig, int from, int ecart, int isFromQ
     pDelete(&sSigMult);
     pLmFree(Lp.lcm);
     Lp.lcm=NULL;
+    
+    pDelete (&m1);
+    pDelete (&m2);
     return;
   }
   // at this point it is clear that the pair will be added to L, since it has
@@ -1883,21 +1891,28 @@ void enterOnePairSig (int i, poly p, poly pSig, int from, int ecart, int isFromQ
   }
 
 // adds buchberger's first criterion
-#if SBA_BUCHBERGER_PROD_CRIT
-//#if 1
+//#if SBA_BUCHBERGER_PROD_CRIT
   if (pLmCmp(m2,pHead(p)) == 0) {
-    printf("PRODUCT CRITERION -- ENTER NEW SYZYGY SIGNATURE\n");
+    Lp.prod_crit  = 1;
+    //Print("PRODUCT CRITERION IN THIS SIGNATURE  ");
+    //pWrite(pHead(Lp.sig));
+#if 0
     enterSyz(Lp, strat);
     // printf("!!!!   EQUAL SIGS   !!!!\n");
     // pSig = sSig, delete element due to Rewritten Criterion
-    strat->cp++;
-    pDelete(&pSigMult);
-    pDelete(&sSigMult);
-    pLmFree(Lp.lcm);
+    //strat->cp++;
+    //pDelete(&pSigMult);
+    //pDelete(&sSigMult);
+    //pLmFree(Lp.lcm);
     Lp.lcm=NULL;
+    
+    //pDelete (&m1);
+    //pDelete (&m2);
     return;
-  }
 #endif
+  } else {
+    Lp.prod_crit  = 0;
+  }
   
   pDelete (&m1);
   pDelete (&m2);
@@ -5134,7 +5149,11 @@ BOOLEAN faugereRewCriterion(poly sig, unsigned long not_sevSig, kStrategy strat,
 //        completely.
 BOOLEAN arriRewCriterion(poly sig, unsigned long not_sevSig, kStrategy strat, int start=0)
 {
-  //printf("Arri Rewritten Criterion\n");
+#if DEBUGF50
+  printf("------------------------------------------------------------------\n");
+  printf("Arri Rewritten Criterion:  ");
+  pWrite(strat->P.sig);
+#endif
   while (strat->Ll > 0 && pLmEqual(strat->L[strat->Ll].sig,strat->P.sig))
   {
     // deletes the short spoly
@@ -5189,6 +5208,9 @@ BOOLEAN arriRewCriterion(poly sig, unsigned long not_sevSig, kStrategy strat, in
         strat->P.Delete();
         strat->P = strat->L[strat->Ll];
         strat->Ll--;
+#if DEBUGF50
+        printf("deleted by other pair with same sig\n");
+#endif
       }
     }
   }
@@ -5198,11 +5220,19 @@ BOOLEAN arriRewCriterion(poly sig, unsigned long not_sevSig, kStrategy strat, in
     {
       if (!(pLmCmp(ppMult_mm(strat->P.sig,pHead(strat->S[ii])),ppMult_mm(strat->sig[ii],strat->P.GetLmCurrRing())) == 1))
       {
+#if DEBUGF50
+        printf("deleted by element in G:  ");
+        pWrite(pHead(strat->S[ii]));
+#endif
         strat->P.Delete();
         return TRUE;
       }
     }
   }
+#if DEBUGF50
+  printf("there is 1 element of the corresponding sig which enters reduction\n");
+  printf("------------------------------------------------------------------\n");
+#endif
   return FALSE;
 }
 
@@ -7166,15 +7196,29 @@ void enterT(LObject p, kStrategy strat, int atT)
 void enterSyz(LObject p, kStrategy strat)
 {
   int i = strat->syzl;
-
+  int new_syz = 1;
   strat->newt = TRUE;
+  // recheck if syzygy is a multiple of one already in SYZ
+  int dd = strat->syzl - 1;
+  while (dd>-1)
+  {
+    if (p_LmShortDivisibleBy( p.sig, p.sevSig, strat->syz[dd],
+          strat->sevSyz[dd], currRing))
+    {
+      printf("-+-+-+-+-+-+-+-+-+-+-+-+-+-+-\n");
+      pWrite(p.sig);
+      pWrite(strat->syz[dd]);
+      printf("-+-+-+-+-+-+-+-+-+-+-+-+-+-+-\n");
+    }
+    dd--;
+  }
   if (strat->syzl == strat->syzmax)
   {
     pEnlargeSet(&strat->syz,strat->syzmax,setmaxTinc);
     strat->sevSyz = (unsigned long*) omRealloc0Size(strat->sevSyz,
-                                    (strat->syzmax)*sizeof(unsigned long),
-                                    ((strat->syzmax)+setmaxTinc)
-                                                  *sizeof(unsigned long));
+        (strat->syzmax)*sizeof(unsigned long),
+        ((strat->syzmax)+setmaxTinc)
+        *sizeof(unsigned long));
     strat->syzmax += setmaxTinc;
   }
   strat->syz[i] = p.sig;
@@ -7189,13 +7233,12 @@ void enterSyz(LObject p, kStrategy strat)
   while (cc>-1)
   {
     if (p_LmShortDivisibleBy( strat->syz[strat->syzl-1], strat->sevSyz[strat->syzl-1], 
-                              strat->L[cc].sig, ~strat->L[cc].sevSig, currRing))
+          strat->L[cc].sig, ~strat->L[cc].sevSig, currRing))
     {
       deleteInL(strat->L,&strat->Ll,cc,strat);
     }
     cc--;
   }
-
 }
 
 void initHilbCrit(ideal F, ideal Q, intvec **hilb,kStrategy strat)

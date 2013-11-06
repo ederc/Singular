@@ -683,6 +683,9 @@ EXAMPLE: example standard; shows an example
          }
       }
       //-------------------- apply NFMora = Mora's normal form -------------
+      print("");
+      print(P[1][1]);
+      print(P[1][2]);
       h = spoly(P[1][1],P[1][2],#[1]);
       if(y>1)
       {
@@ -717,6 +720,10 @@ EXAMPLE: example standard; shows an example
         v=v+P[2];                //with useful pairs (g,h), g from S
          P=P[1];
          S=S,h;                  //update S, will become the standard basis
+      }
+      else
+      {
+        print("ZERO REDUCTION");
       }
    }
 //------------------------------ finished ---------------------------------
