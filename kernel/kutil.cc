@@ -1779,8 +1779,8 @@ void enterOnePairSig (int i, poly p, poly pSig, int, int ecart, int isFromQ, kSt
               // the corresponding signatures for criteria checks
   LObject  Lp;
   // poly last;
-  poly pSigMult = p_Copy(pSig,currRing);
-  poly sSigMult = p_Copy(strat->sig[i],currRing);
+  poly pSigMult = p_Copy(pSig,strat->tailRing);
+  poly sSigMult = p_Copy(strat->sig[i],strat->tailRing);
   unsigned long pSigMultNegSev,sSigMultNegSev;
   Lp.i_r = -1;
 
@@ -1815,10 +1815,10 @@ void enterOnePairSig (int i, poly p, poly pSig, int, int ecart, int isFromQ, kSt
   pWrite(m2);
 #endif
   // get multiplied signatures for testing
-  pSigMult = currRing->p_Procs->pp_Mult_mm(pSigMult,m1,currRing);
-  pSigMultNegSev = ~p_GetShortExpVector(pSigMult,currRing);
-  sSigMult = currRing->p_Procs->pp_Mult_mm(sSigMult,m2,currRing);
-  sSigMultNegSev = ~p_GetShortExpVector(sSigMult,currRing);
+  pSigMult = strat->tailRing->p_Procs->pp_Mult_mm(pSigMult,m1,strat->tailRing);
+  pSigMultNegSev = ~p_GetShortExpVector(pSigMult,strat->tailRing);
+  sSigMult = strat->tailRing->p_Procs->pp_Mult_mm(sSigMult,m2,strat->tailRing);
+  sSigMultNegSev = ~p_GetShortExpVector(sSigMult,strat->tailRing);
 
 //#if 1
 #ifdef DEBUGF5
@@ -1850,7 +1850,7 @@ void enterOnePairSig (int i, poly p, poly pSig, int, int ecart, int isFromQ, kSt
   //       i.e. strat->checked > strat->from if and only if the 2nd generator
   //       gives the bigger signature.
   Lp.checked = strat->sl+1;
-  int sigCmp = p_LmCmp(pSigMult,sSigMult,currRing);
+  int sigCmp = p_LmCmp(pSigMult,sSigMult,strat->tailRing);
 //#if 1
 #if DEBUGF5
   printf("IN PAIR GENERATION - COMPARING SIGS: %d\n",sigCmp);
@@ -1875,7 +1875,7 @@ void enterOnePairSig (int i, poly p, poly pSig, int, int ecart, int isFromQ, kSt
 
   // store from which element this pair comes from for further tests
   Lp.from = strat->sl+1;
-  if(sigCmp==currRing->OrdSgn)
+  if(sigCmp==strat->tailRing->OrdSgn)
   {
     // pSig > sSig
     pDelete (&sSigMult);
@@ -4607,7 +4607,7 @@ int posInL0 (const LSet set, const int length,
 * to the signature order
 */
 int posInLSig (const LSet set, const int length,
-               LObject* p,const kStrategy /*strat*/)
+               LObject* p,const kStrategy strat)
 {
 if (length<0) return 0;
 if (pLmCmp(set[length].sig,p->sig)== currRing->OrdSgn)
@@ -4620,11 +4620,11 @@ loop
 {
   if (an >= en-1)
   {
-    if (pLmCmp(set[an].sig,p->sig) == currRing->OrdSgn) return en;
+    if (p_LmCmp(set[an].sig,p->sig,strat->tailRing) == strat->tailRing->OrdSgn) return en;
     return an;
   }
   i=(an+en) / 2;
-  if (pLmCmp(set[i].sig,p->sig) == currRing->OrdSgn) an=i;
+  if (p_LmCmp(set[i].sig,p->sig,strat->tailRing) == strat->tailRing->OrdSgn) an=i;
   else                                      en=i;
   /*aend. fuer lazy == in !=- machen */
 }
@@ -5069,7 +5069,7 @@ BOOLEAN syzCriterion(poly sig, unsigned long not_sevSig, kStrategy strat)
     Print("checking with: %d --  ",k);
     pWrite(pHead(strat->syz[k]));
 #endif
-    if (p_LmShortDivisibleBy(strat->syz[k], strat->sevSyz[k], sig, not_sevSig, currRing))
+    if (p_LmShortDivisibleBy(strat->syz[k], strat->sevSyz[k], sig, not_sevSig, strat->tailRing))
     {
 //#if 1
 #ifdef DEBUGF5
@@ -5091,7 +5091,7 @@ BOOLEAN syzCriterionInc(poly sig, unsigned long not_sevSig, kStrategy strat)
   Print("syzygy criterion checks:  ");
   pWrite(sig);
 #endif
-  int comp = p_GetComp(sig, currRing);
+  int comp = p_GetComp(sig, strat->tailRing);
   int min, max;
   if (comp<=1)
     return FALSE;
@@ -5116,7 +5116,7 @@ BOOLEAN syzCriterionInc(poly sig, unsigned long not_sevSig, kStrategy strat)
       Print("checking with: %d --  ",k);
       pWrite(pHead(strat->syz[k]));
 #endif
-      if (p_LmShortDivisibleBy(strat->syz[k], strat->sevSyz[k], sig, not_sevSig, currRing))
+      if (p_LmShortDivisibleBy(strat->syz[k], strat->sevSyz[k], sig, not_sevSig, strat->tailRing))
         return TRUE;
     }
     return FALSE;
@@ -5143,7 +5143,7 @@ BOOLEAN faugereRewCriterion(poly sig, unsigned long not_sevSig, kStrategy strat,
     pWrite(strat->sig[k]);
     pWrite(pHead(strat->S[k]));
 #endif
-    if (p_LmShortDivisibleBy(strat->sig[k], strat->sevSig[k], sig, not_sevSig, currRing))
+    if (p_LmShortDivisibleBy(strat->sig[k], strat->sevSig[k], sig, not_sevSig, strat->tailRing))
     //if (p_LmEqual(strat->sig[k], sig, currRing))
     {
 //#if 1
@@ -5186,7 +5186,7 @@ BOOLEAN faugereRewCriterion(poly sig, unsigned long not_sevSig, kStrategy strat,
 BOOLEAN arriRewCriterion(poly /*sig*/, unsigned long /*not_sevSig*/, kStrategy strat, int /*start=0*/)
 {
   //printf("Arri Rewritten Criterion\n");
-  while (strat->Ll > 0 && pLmEqual(strat->L[strat->Ll].sig,strat->P.sig))
+  while (strat->Ll > 0 && p_LmEqual(strat->L[strat->Ll].sig,strat->P.sig,strat->tailRing))
   {
     // deletes the short spoly
 #ifdef HAVE_RINGS
@@ -5246,9 +5246,11 @@ BOOLEAN arriRewCriterion(poly /*sig*/, unsigned long /*not_sevSig*/, kStrategy s
   }
   for (int ii=strat->sl; ii>-1; ii--)
   {
-    if (p_LmShortDivisibleBy(strat->sig[ii], strat->sevSig[ii], strat->P.sig, ~strat->P.sevSig, currRing))
+    if (p_LmShortDivisibleBy(strat->sig[ii], strat->sevSig[ii], strat->P.sig, ~strat->P.sevSig,
+          strat->tailRing))
     {
-      if (!(pLmCmp(ppMult_mm(strat->P.sig,pHead(strat->S[ii])),ppMult_mm(strat->sig[ii],strat->P.GetLmCurrRing())) == 1))
+      if (!(p_LmCmp(pp_Mult_mm(strat->P.sig,p_Head(strat->S[ii],strat->tailRing),strat->tailRing),
+              pp_Mult_mm(strat->sig[ii],strat->P.GetLmTailRing(),strat->tailRing),strat->tailRing) == 1))
       {
         strat->P.Delete();
         return TRUE;
@@ -5989,7 +5991,7 @@ void initSLSba (ideal F, ideal Q,kStrategy strat)
     {
       LObject h;
       h.p = pCopy(F->m[i]);
-      h.sig = pOne();
+      h.sig = p_One(currRing);
       //h.sig = pInit();
       //p_SetCoeff(h.sig,nInit(1),currRing);
       p_SetComp(h.sig,i+1,currRing);
@@ -6002,7 +6004,10 @@ void initSLSba (ideal F, ideal Q,kStrategy strat)
       {
         p_ExpVectorAdd (h.sig,F->m[i],currRing);
       }
-      h.sevSig = pGetShortExpVector(h.sig);
+      pWrite(h.sig);
+      h.sig     = k_LmInit_currRing_2_tailRing(h.sig,strat->tailRing);
+      p_Write(h.sig,strat->tailRing);
+      h.sevSig  = pGetShortExpVector(h.sig);
 #ifdef DEBUGF5
       pWrite(h.p);
       pWrite(h.sig);
@@ -6091,7 +6096,7 @@ void initSyzRules (kStrategy strat)
      ***********************************************************/
     for(i=1; i<=strat->sl; i++)
     {
-      if (pGetComp(strat->sig[i-1]) != pGetComp(strat->sig[i]))
+      if (p_GetComp(strat->sig[i-1],strat->tailRing) != p_GetComp(strat->sig[i],strat->tailRing))
       {
         ps += i;
       }
@@ -6120,10 +6125,10 @@ void initSyzRules (kStrategy strat)
        * => the rules for a signature with component comp start
        *    at strat->syz[strat->syzIdx[comp-2]] !
        *********************************************************/
-      if (pGetComp(strat->sig[i-1]) != pGetComp(strat->sig[i]))
+      if (p_GetComp(strat->sig[i-1],strat->tailRing) != p_GetComp(strat->sig[i],strat->tailRing))
       {
-        comp      = pGetComp(strat->sig[i]);
-        comp_old  = pGetComp(strat->sig[i-1]);
+        comp      = p_GetComp(strat->sig[i],strat->tailRing);
+        comp_old  = p_GetComp(strat->sig[i-1],strat->tailRing);
         diff      = comp - comp_old - 1;
         // diff should be zero, but sometimes also the initial generating
         // elements of the input ideal reduce to zero. then there is an
@@ -6142,18 +6147,18 @@ void initSyzRules (kStrategy strat)
         j++;
         for (k = 0; k<i; k++)
         {
-          poly p          = pOne();
+          poly p          = p_One(strat->tailRing);
           pLcm(strat->S[k],strat->S[i],p);
           strat->syz[ctr] = p;
-          p_SetCompP (strat->syz[ctr], comp, currRing);
-          poly q          = p_Copy(p, currRing);
-          q               = p_Neg (q, currRing);
-          p_SetCompP (q, p_GetComp(strat->sig[k], currRing), currRing);
-          strat->syz[ctr] = p_Add_q (strat->syz[ctr], q, currRing);
+          p_SetCompP (strat->syz[ctr], comp, strat->tailRing);
+          poly q          = p_Copy(p, strat->tailRing);
+          q               = p_Neg (q, strat->tailRing);
+          p_SetCompP (q, p_GetComp(strat->sig[k], strat->tailRing), strat->tailRing);
+          strat->syz[ctr] = p_Add_q (strat->syz[ctr], q, strat->tailRing);
 #if defined(DEBUGF5) || defined(DEBUGF51)
           pWrite(strat->syz[ctr]);
 #endif
-          strat->sevSyz[ctr] = p_GetShortExpVector(strat->syz[ctr],currRing);
+          strat->sevSyz[ctr] = p_GetShortExpVector(strat->syz[ctr],strat->tailRing);
           ctr++;
         }
       }
@@ -6163,7 +6168,7 @@ void initSyzRules (kStrategy strat)
     * add syzygies for upcoming first element of new iteration step
     **************************************************************/
     comp      = strat->currIdx;
-    comp_old  = pGetComp(strat->sig[i-1]);
+    comp_old  = p_GetComp(strat->sig[i-1],strat->tailRing);
     diff      = comp - comp_old - 1;
     // diff should be zero, but sometimes also the initial generating
     // elements of the input ideal reduce to zero. then there is an
@@ -6181,18 +6186,18 @@ void initSyzRules (kStrategy strat)
     strat->syzIdx[j]  = ctr;
     for (k = 0; k<strat->sl+1; k++)
     {
-      strat->syz[ctr] = p_Copy (pHead(strat->S[k]), currRing);
-      p_SetCompP (strat->syz[ctr], comp, currRing);
-      poly q          = p_Copy (pHead(strat->L[strat->Ll].p), currRing);
-      q               = p_Neg (q, currRing);
-      p_SetCompP (q, p_GetComp(strat->sig[k], currRing), currRing);
-      strat->syz[ctr] = p_Add_q (strat->syz[ctr], q, currRing);
+      strat->syz[ctr] = p_Copy (pHead(strat->S[k]), strat->tailRing);
+      p_SetCompP (strat->syz[ctr], comp, strat->tailRing);
+      poly q          = p_Copy (p_Head(strat->L[strat->Ll].p,strat->tailRing), strat->tailRing);
+      q               = p_Neg (q, strat->tailRing);
+      p_SetCompP (q, p_GetComp(strat->sig[k], strat->tailRing), strat->tailRing);
+      strat->syz[ctr] = p_Add_q (strat->syz[ctr], q, strat->tailRing);
 //#if 1
 #if DEBUGF5 || DEBUGF51
       printf("..");
       pWrite(strat->syz[ctr]);
 #endif
-      strat->sevSyz[ctr] = p_GetShortExpVector(strat->syz[ctr],currRing);
+      strat->sevSyz[ctr] = p_GetShortExpVector(strat->syz[ctr],strat->tailRing);
       ctr++;
     }
 //#if 1
@@ -7121,9 +7126,9 @@ void enterSSba (LObject p,int atS,kStrategy strat, int atR)
   if (p.sig != NULL)
   {
     if (p.sevSig == 0)
-      p.sevSig = pGetShortExpVector(p.sig);
+      p.sevSig = p_GetShortExpVector(p.sig,strat->tailRing);
     else
-      assume(p.sevSig == pGetShortExpVector(p.sig));
+      assume(p.sevSig == p_GetShortExpVector(p.sig,strat->tailRing));
     strat->sevSig[atS] = p.sevSig; // TODO: get the correct signature in here!
   }
   strat->ecartS[atS] = p.ecart;
@@ -7242,7 +7247,7 @@ void enterSyz(LObject p, kStrategy strat)
   while (cc>-1)
   {
     if (p_LmShortDivisibleBy( strat->syz[strat->syzl-1], strat->sevSyz[strat->syzl-1],
-                              strat->L[cc].sig, ~strat->L[cc].sevSig, currRing))
+                              strat->L[cc].sig, ~strat->L[cc].sevSig, strat->tailRing))
     {
       deleteInL(strat->L,&strat->Ll,cc,strat);
     }

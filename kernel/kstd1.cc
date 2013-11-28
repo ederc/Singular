@@ -2272,7 +2272,7 @@ ideal kSba(ideal F, ideal Q, tHomog h,intvec ** w, int incremental, int arri, in
   }
   if (arri!=0)
   {
-    strat->rewCrit1 = arriRewDummy;
+    strat->rewCrit1 = arriRewCriterion;
     strat->rewCrit2 = arriRewCriterion;
   }
   else

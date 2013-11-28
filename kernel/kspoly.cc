@@ -222,12 +222,11 @@ int ksReducePolySig(LObject* PR,
   //printf("COMPARE IDX: %ld -- %ld\n",idx,strat->currIdx);
   if (!PW->is_sigsafe)
   {
-    PR->SetLmCurrRing();
     //poly f1 = pCopy(PR->GetLmTailRing());   // p2 | p1
     //poly f2 = PW->GetLmTailRing();   // i.e. will reduce p1 with p2; lm = LT(p1) / LM(p2)
-    poly f1 = p_Copy(PR->GetLmCurrRing(),currRing);
-    poly f2 = PW->GetLmCurrRing();
-    poly sigMult = pCopy(PW->sig);   // copy signature of reducer
+    poly f1 = p_Copy(PR->GetLmTailRing(),strat->tailRing);
+    poly f2 = PW->GetLmTailRing();
+    poly sigMult = p_Copy(PW->sig,strat->tailRing);   // copy signature of reducer
     p_ExpVectorSub(f1, f2, currRing); // Calculate the Monomial we must multiply to p2
 //#if 1
 #ifdef DEBUGF5
@@ -237,7 +236,7 @@ int ksReducePolySig(LObject* PR,
     pWrite(sigMult);
     printf("--------------\n");
 #endif
-    sigMult = pp_Mult_qq(f1,sigMult,currRing);
+    sigMult = pp_Mult_qq(f1,sigMult,strat->tailRing);
 //#if 1
 #ifdef DEBUGF5
     printf("------------------- IN KSREDUCEPOLYSIG: --------------------\n");
@@ -247,7 +246,7 @@ int ksReducePolySig(LObject* PR,
     pWrite(PR->sig);
     printf("--------------\n");
 #endif
-    int sigSafe = p_LmCmp(PR->sig,sigMult,currRing);
+    int sigSafe = p_LmCmp(PR->sig,sigMult,strat->tailRing);
     // now we can delete the copied polynomial data used for checking for
     // sig-safeness of the reduction step
 //#if 1

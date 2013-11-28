@@ -1790,9 +1790,9 @@ ideal sba (ideal F0, ideal Q,intvec *w,intvec *hilb,kStrategy strat)
       if (strat->Ll<0) break;
       else strat->noClearS=TRUE;
     }
-    if (strat->incremental && pGetComp(strat->L[strat->Ll].sig) != strat->currIdx)
+    if (strat->incremental && p_GetComp(strat->L[strat->Ll].sig,strat->tailRing) != strat->currIdx)
     {
-      strat->currIdx  = pGetComp(strat->L[strat->Ll].sig);
+      strat->currIdx  = p_GetComp(strat->L[strat->Ll].sig,strat->tailRing);
 #if F5C
       // 1. interreduction of the current standard basis
       // 2. generation of new principal syzygy rules for syzCriterion
@@ -1959,7 +1959,7 @@ ideal sba (ideal F0, ideal Q,intvec *w,intvec *hilb,kStrategy strat)
     {
       for (int jj = 0; jj<strat->tl+1; jj++)
       {
-        if (pGetComp(strat->T[jj].sig) == strat->currIdx)
+        if (p_GetComp(strat->T[jj].sig,strat->tailRing) == strat->currIdx)
         {
           strat->T[jj].is_sigsafe = FALSE;
         }
@@ -2008,7 +2008,7 @@ ideal sba (ideal F0, ideal Q,intvec *w,intvec *hilb,kStrategy strat)
         BOOLEAN overwrite = TRUE;
         for (int tk=0; tk<strat->sl+1; tk++)
         {
-          if (pGetComp(strat->sig[tk]) == pGetComp(strat->P.sig))
+          if (p_GetComp(strat->sig[tk],strat->tailRing) == p_GetComp(strat->P.sig,strat->tailRing))
           {
             //printf("TK %d / %d\n",tk,strat->sl);
             overwrite = FALSE;
@@ -2018,13 +2018,13 @@ ideal sba (ideal F0, ideal Q,intvec *w,intvec *hilb,kStrategy strat)
         //printf("OVERWRITE %d\n",overwrite);
         if (overwrite)
         {
-          int cmp = pGetComp(strat->P.sig);
+          int cmp = p_GetComp(strat->P.sig,strat->tailRing);
           int* vv = (int*)omAlloc((currRing->N+1)*sizeof(int));
-          pGetExpV (strat->P.p,vv);
-          pSetExpV (strat->P.sig, vv);
-          pSetComp (strat->P.sig,cmp);
+          p_GetExpV (strat->P.p,vv,strat->tailRing);
+          p_SetExpV (strat->P.sig, vv,strat->tailRing);
+          p_SetComp (strat->P.sig,cmp,strat->tailRing);
 
-          strat->P.sevSig = pGetShortExpVector (strat->P.sig);
+          strat->P.sevSig = p_GetShortExpVector (strat->P.sig,strat->tailRing);
           for(int ps=0;ps<strat->sl+1;ps++)
           {
             int i = strat->syzl;
@@ -2039,7 +2039,7 @@ ideal sba (ideal F0, ideal Q,intvec *w,intvec *hilb,kStrategy strat)
                   *sizeof(unsigned long));
               strat->syzmax += setmaxTinc;
             }
-            strat->syz[i] = pCopy(strat->P.sig);
+            strat->syz[i] = p_Copy(strat->P.sig,strat->tailRing);
             // add LM(F->m[i]) to the signature to get a Schreyer order
             // without changing the underlying polynomial ring at all
             p_ExpVectorAdd (strat->syz[i],strat->S[ps],currRing);
@@ -2051,12 +2051,12 @@ ideal sba (ideal F0, ideal Q,intvec *w,intvec *hilb,kStrategy strat)
             // module monomial strat->P.sig gives the leading monomial of
             // the corresponding principal syzygy
             // => we do not need to compute the "real" syzygy completely
-            poly help = pCopy(strat->sig[ps]);
-            p_ExpVectorAdd (help,strat->P.p,currRing);
-            strat->syz[i] = p_Add_q(strat->syz[i],help,currRing);
+            poly help = p_Copy(strat->sig[ps],strat->tailRing);
+            p_ExpVectorAdd (help,strat->P.p,strat->tailRing);
+            strat->syz[i] = p_Add_q(strat->syz[i],help,strat->tailRing);
             //printf("%d. SYZ  ",i+1);
             //pWrite(strat->syz[i]);
-            strat->sevSyz[i] = p_GetShortExpVector(strat->syz[i],currRing);
+            strat->sevSyz[i] = p_GetShortExpVector(strat->syz[i],strat->tailRing);
             strat->syzl++;
           }
         }
