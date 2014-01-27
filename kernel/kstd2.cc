@@ -45,7 +45,7 @@
 
 #define F5C       1
 #if F5C
-  #define F5CTAILRED 0
+  #define F5CTAILRED 1
 #endif
 
 #define SBA_INTERRED_START                  0
@@ -1800,8 +1800,6 @@ ideal sba (ideal F0, ideal Q,intvec *w,intvec *hilb,kStrategy strat)
     strat->P = strat->L[strat->Ll];
     strat->Ll--;
     /* reduction of the element choosen from L */
-    if (strat->P.prod_crit)
-      printf("PC\n");
     if (!strat->rewCrit2(strat->P.sig, ~strat->P.sevSig, strat->P.GetLmCurrRing(), strat, strat->P.checked+1)) {
       //#if 1
 #ifdef DEBUGF5
@@ -2145,8 +2143,8 @@ ideal sba (ideal F0, ideal Q,intvec *w,intvec *hilb,kStrategy strat)
           //printf("++ -- done adding syzygies -- ++\n");
         }
       }
-#if 1
-//#if DEBUGF50
+//#if 1
+#if DEBUGF50
     printf("---------------------------\n");
     Print(" %d. ELEMENT ADDED TO GCURR:\n",strat->sl+1);
     Print("LEAD POLY:  "); pWrite0(pHead(strat->S[strat->sl]));
@@ -2216,8 +2214,8 @@ ideal sba (ideal F0, ideal Q,intvec *w,intvec *hilb,kStrategy strat)
 #endif
         int pos = posInSyz(strat, strat->P.sig);
         enterSyz(strat->P, strat, pos);
-#if 1
-//#ifdef DEBUGF5
+//#if 1
+#ifdef DEBUGF5
         Print("ADDING STUFF TO SYZ :  ");
         //pWrite(strat->P.p);
         pWrite(strat->P.sig);
@@ -2595,8 +2593,8 @@ void f5c (kStrategy strat, int& olddeg, int& minimcnt, int& hilbeledeg,
   {
     strat->P = strat->L[strat->Ll];
     strat->Ll--;
-#if 1
-//#ifdef DEBUGF5
+//#if 1
+#ifdef DEBUGF5
     Print("NEXT PAIR TO HANDLE IN INTERRED ALGORITHM\n");
     Print("-------------------------------------------------\n");
     pWrite(pHead(strat->P.p));
