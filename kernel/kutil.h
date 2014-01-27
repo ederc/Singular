@@ -65,6 +65,11 @@ typedef denominator_list_s *denominator_list;
 struct denominator_list_s{number n; denominator_list next;};
 extern denominator_list DENOMINATOR_LIST;
 
+extern long sba_operations;
+extern long sba_reduction_steps;
+extern long sba_interreduction_operations;
+extern long sba_interreduction_steps;
+
 class sTObject
 {
 public:

@@ -30,6 +30,8 @@ int create_count = 0;
 #define TEST_OPT_DEBUG_RED
 #endif
 
+#define SBA_PRINT_STEPS 1
+
 /***************************************************************
  *
  * Reduces PR with PW
@@ -125,6 +127,9 @@ int ksReducePoly(LObject* PR,
     number an = pGetCoeff(p2);
     int ct = ksCheckCoeff(&an, &bn, tailRing->cf);    // Calculate special LC
     p_SetCoeff(lm, bn, tailRing);
+#if SBA_PRINT_STEPS
+    sba_operations++;
+#endif
     if ((ct == 0) || (ct == 2))
       PR->Tail_Mult_nn(an);
     if (coef != NULL) *coef = an;
@@ -137,6 +142,10 @@ int ksReducePoly(LObject* PR,
 
 
   // and finally,
+#if SBA_PRINT_STEPS
+  sba_interreduction_steps++;
+  sba_interreduction_operations  +=  PW->GetpLength()-1;
+#endif
   PR->Tail_Minus_mm_Mult_qq(lm, t2, PW->GetpLength() - 1, spNoether);
   assume(PW->GetpLength() == pLength(PW->p != NULL ? PW->p : PW->t_p));
   PR->LmDeleteAndIter();
@@ -329,6 +338,9 @@ int ksReducePolySig(LObject* PR,
     number an = pGetCoeff(p2);
     int ct = ksCheckCoeff(&an, &bn, tailRing->cf);    // Calculate special LC
     p_SetCoeff(lm, bn, tailRing);
+#if SBA_PRINT_STEPS
+    sba_operations++;
+#endif
     if ((ct == 0) || (ct == 2))
       PR->Tail_Mult_nn(an);
     if (coef != NULL) *coef = an;
@@ -341,6 +353,10 @@ int ksReducePolySig(LObject* PR,
 
 
   // and finally,
+#if SBA_PRINT_STEPS
+  sba_reduction_steps++;
+  sba_operations  +=  PW->GetpLength()-1;
+#endif
   PR->Tail_Minus_mm_Mult_qq(lm, t2, PW->GetpLength() - 1, spNoether);
   assume(PW->GetpLength() == pLength(PW->p != NULL ? PW->p : PW->t_p));
   PR->LmDeleteAndIter();
@@ -456,6 +472,11 @@ void ksCreateSpoly(LObject* Pair,   poly spNoether,
 
   // get m2*a2 - m1*a1
   Pair->Tail_Minus_mm_Mult_qq(m1, a1, l1, spNoether);
+#if SBA_PRINT_STEPS
+  sba_operations++;
+  sba_reduction_steps++;
+  sba_operations  +=  pLength(p2)-1;
+#endif
 
   // Clean-up time
   Pair->LmDeleteAndIter();

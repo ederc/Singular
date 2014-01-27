@@ -45,17 +45,17 @@
 
 #define F5C       1
 #if F5C
-  #define F5CTAILRED 1
+  #define F5CTAILRED 0
 #endif
 
 #define SBA_INTERRED_START                  0
-#define SBA_TAIL_RED                        1
+#define SBA_TAIL_RED                        0
 #define SBA_PRODUCT_CRITERION               0
-#define SBA_PRINT_ZERO_REDUCTIONS           0
-#define SBA_PRINT_REDUCTION_STEPS           0
-#define SBA_PRINT_OPERATIONS                0
-#define SBA_PRINT_SIZE_G                    0
-#define SBA_PRINT_SIZE_SYZ                  0
+#define SBA_PRINT_ZERO_REDUCTIONS           1
+#define SBA_PRINT_REDUCTION_STEPS           1
+#define SBA_PRINT_OPERATIONS                1
+#define SBA_PRINT_SIZE_G                    1
+#define SBA_PRINT_SIZE_SYZ                  1
 #define SBA_PRINT_PRODUCT_CRITERION         0
 
 // counts sba's reduction steps
@@ -473,12 +473,6 @@ int redHomog (LObject* h,kStrategy strat)
     assume(strat->fromT == FALSE);
 
     ksReducePoly(h, &(strat->T[ii]), NULL, NULL, strat);
-#if SBA_PRINT_REDUCTION_STEPS
-    sba_interreduction_steps++;
-#endif
-#if SBA_PRINT_OPERATIONS
-    sba_interreduction_operations  +=  pLength(strat->T[ii].p);
-#endif
 
 #ifdef KDEBUG
     if (TEST_OPT_DEBUG)
@@ -661,14 +655,6 @@ int redSig (LObject* h,kStrategy strat)
     printf("INDEX OF REDUCER T: %d\n",ii);
 #endif
     sigSafe = ksReducePolySig(h, &(strat->T[ii]), strat->S_2_R[ii], NULL, NULL, strat);
-#if SBA_PRINT_REDUCTION_STEPS
-    if (sigSafe != 3)
-      sba_reduction_steps++;
-#endif
-#if SBA_PRINT_OPERATIONS
-    if (sigSafe != 3)
-      sba_operations  +=  pLength(strat->T[ii].p);
-#endif
     // if reduction has taken place, i.e. the reduction was sig-safe
     // otherwise start is already at the next position and the loop
     // searching reducers in T goes on from index start
@@ -793,14 +779,6 @@ poly redtailSba (LObject* L, int pos, kStrategy strat, BOOLEAN withT, BOOLEAN no
       }
       strat->redTailChange=TRUE;
       int ret = ksReducePolyTailSig(L, With, &Ln);
-#if SBA_PRINT_REDUCTION_STEPS
-      if (ret != 3)
-        sba_reduction_steps++;
-#endif
-#if SBA_PRINT_OPERATIONS
-      if (ret != 3)
-        sba_operations  +=  pLength(With->p);
-#endif
       if (ret)
       {
         // reducing the tail would violate the exp bound
@@ -924,12 +902,6 @@ int redLazy (LObject* h,kStrategy strat)
 #endif
 
     ksReducePoly(h, &(strat->T[ii]), NULL, NULL, strat);
-#if SBA_PRINT_REDUCTION_STEPS
-    sba_interreduction_steps++;
-#endif
-#if SBA_PRINT_OPERATIONS
-    sba_interreduction_operations  +=  pLength(strat->T[ii].p);
-#endif
 
 #ifdef KDEBUG
     if (TEST_OPT_DEBUG)
@@ -1100,12 +1072,6 @@ int redHoney (LObject* h, kStrategy strat)
 
     number coef;
     ksReducePoly(h,&(strat->T[ii]),strat->kNoetherTail(),&coef,strat);
-#if SBA_PRINT_REDUCTION_STEPS
-    sba_interreduction_steps++;
-#endif
-#if SBA_PRINT_OPERATIONS
-    sba_interreduction_operations  +=  pLength(strat->T[ii].p);
-#endif
 #ifdef KDEBUG
     if (TEST_OPT_DEBUG)
     {
@@ -1834,7 +1800,8 @@ ideal sba (ideal F0, ideal Q,intvec *w,intvec *hilb,kStrategy strat)
     strat->P = strat->L[strat->Ll];
     strat->Ll--;
     /* reduction of the element choosen from L */
-
+    if (strat->P.prod_crit)
+      printf("PC\n");
     if (!strat->rewCrit2(strat->P.sig, ~strat->P.sevSig, strat->P.GetLmCurrRing(), strat, strat->P.checked+1)) {
       //#if 1
 #ifdef DEBUGF5
@@ -2178,12 +2145,34 @@ ideal sba (ideal F0, ideal Q,intvec *w,intvec *hilb,kStrategy strat)
           //printf("++ -- done adding syzygies -- ++\n");
         }
       }
-//#if 1
-#if DEBUGF50
+#if 1
+//#if DEBUGF50
     printf("---------------------------\n");
     Print(" %d. ELEMENT ADDED TO GCURR:\n",strat->sl+1);
-    Print("LEAD POLY:  "); pWrite(pHead(strat->S[strat->sl]));
+    Print("LEAD POLY:  "); pWrite0(pHead(strat->S[strat->sl]));
+    printf(" || %d terms\n", pLength(strat->S[strat->sl]));
     Print("SIGNATURE:  "); pWrite(strat->sig[strat->sl]);
+#if SBA_PRINT_OPERATIONS
+  printf("OPERATIONS:                 %ld\n",sba_operations);
+#endif
+#if SBA_PRINT_REDUCTION_STEPS
+  printf("- - - - - - - - - - - - - - - - - - - - - - - - - - - - - \n");
+  printf("INTERREDUCTIONS:            %ld\n",sba_interreduction_steps);
+#endif
+#if SBA_PRINT_OPERATIONS
+  printf("INTERREDUCTION OPERATIONS:  %ld\n",sba_interreduction_operations);
+  printf("INTERREDUCTION OPERATIONS:  %ld\n",sba_interreduction_operations / 3);
+  printf("INTERREDUCTION OPERATIONS:  %ld\n",(sba_interreduction_operations / 3)*2);
+#endif
+#if SBA_PRINT_REDUCTION_STEPS
+  printf("- - - - - - - - - - - - - - - - - - - - - - - - - - - - - \n");
+  printf("ALL REDUCTIONS:             %ld\n",
+      sba_reduction_steps+(sba_interreduction_steps / 3)*2);
+#endif
+#if SBA_PRINT_OPERATIONS
+  printf("ALL OPERATIONS:             %ld\n",
+      sba_operations+(sba_interreduction_operations / 3)*2);
+#endif
 #endif
       /*
       if (newrules)
@@ -2227,8 +2216,8 @@ ideal sba (ideal F0, ideal Q,intvec *w,intvec *hilb,kStrategy strat)
 #endif
         int pos = posInSyz(strat, strat->P.sig);
         enterSyz(strat->P, strat, pos);
-//#if 1
-#ifdef DEBUGF5
+#if 1
+//#ifdef DEBUGF5
         Print("ADDING STUFF TO SYZ :  ");
         //pWrite(strat->P.p);
         pWrite(strat->P.sig);
@@ -2311,9 +2300,11 @@ ideal sba (ideal F0, ideal Q,intvec *w,intvec *hilb,kStrategy strat)
 #endif /* MYTEST */
 #endif /* KDEBUG */
 #if SBA_PRINT_SIZE_G
+  idSkipZeroes(strat->Shdl);
   size_g_non_red  = IDELEMS(strat->Shdl);
 #endif
-  if ((strat->sbaOrder == 1 || strat->sbaOrder == 3) && sRing!=currRingOld)
+  if ((strat->sbaOrder == 1 || strat->sbaOrder == 3)
+      && sRing!=currRingOld)
   {
     rChangeCurrRing (currRingOld);
     F0          = idrMoveR (F1, sRing, currRing);
@@ -2321,7 +2312,6 @@ ideal sba (ideal F0, ideal Q,intvec *w,intvec *hilb,kStrategy strat)
     rDelete (sRing);
   }
   id_DelDiv(strat->Shdl, currRing);
-  idSkipZeroes(strat->Shdl);
   idTest(strat->Shdl);
 
 #if SBA_PRINT_SIZE_G
@@ -2369,7 +2359,8 @@ ideal sba (ideal F0, ideal Q,intvec *w,intvec *hilb,kStrategy strat)
 #endif
 #if SBA_PRINT_SIZE_G
   printf("----------------------------------------------------------\n");
-  printf("SIZE OF G:                  %d / %d\n",size_g,size_g_non_red);
+  //printf("SIZE OF G:                  %d / %d\n",size_g,size_g_non_red);
+  printf("SIZE OF G:                  %d\n",size_g_non_red);
   size_g          = 0;
   size_g_non_red  = 0;
 #endif
@@ -2604,8 +2595,8 @@ void f5c (kStrategy strat, int& olddeg, int& minimcnt, int& hilbeledeg,
   {
     strat->P = strat->L[strat->Ll];
     strat->Ll--;
-//#if 1
-#ifdef DEBUGF5
+#if 1
+//#ifdef DEBUGF5
     Print("NEXT PAIR TO HANDLE IN INTERRED ALGORITHM\n");
     Print("-------------------------------------------------\n");
     pWrite(pHead(strat->P.p));

@@ -85,6 +85,7 @@
 
 #define ADIDEBUG 0
 
+
 denominator_list DENOMINATOR_LIST=NULL;
 
 
@@ -1854,9 +1855,32 @@ void enterOnePairSig (int i, poly p, poly pSig, int, int ecart, int isFromQ, kSt
   // testing by syzCrit = F5 Criterion
   // testing by rewCrit1 = Rewritten Criterion
   // NOTE: Arri's Rewritten Criterion is tested below, we need Lp.p for it!
-  if  ( strat->syzCrit(pSigMult,pSigMultNegSev,strat) ||
-        strat->syzCrit(sSigMult,sSigMultNegSev,strat)
-        || strat->rewCrit1(sSigMult,sSigMultNegSev,Lp.lcm,strat,i+1)
+  // adds buchberger's first criterion
+  BOOLEAN check_pc = FALSE;
+  if (pLmCmp(m2,pHead(p)) == 0) {
+    check_pc = TRUE; // Product Criterion
+  }
+  if  ( strat->syzCrit(pSigMult,pSigMultNegSev,strat) )
+  {
+    pDelete(&pSigMult);
+    pDelete(&sSigMult);
+    pLmFree(Lp.lcm);
+    Lp.lcm=NULL;
+    pDelete (&m1);
+    pDelete (&m2);
+    return;
+  }
+  if  ( strat->syzCrit(sSigMult,sSigMultNegSev,strat) )
+  {
+    pDelete(&pSigMult);
+    pDelete(&sSigMult);
+    pLmFree(Lp.lcm);
+    Lp.lcm=NULL;
+    pDelete (&m1);
+    pDelete (&m2);
+    return;
+  }
+  if  ( strat->rewCrit1(sSigMult,sSigMultNegSev,Lp.lcm,strat,i+1)
       )
   {
     pDelete(&pSigMult);
@@ -2007,8 +2031,13 @@ void enterOnePairSig (int i, poly p, poly pSig, int, int ecart, int isFromQ, kSt
     pWrite(Lp.sig);
 #endif
     /*- the pair (S[i],p) enters B -*/
-    Lp.p1 = strat->S[i];
-    Lp.p2 = p;
+    if(sigCmp==currRing->OrdSgn) {
+      Lp.p1 = p;
+      Lp.p2 = strat->S[i];
+    } else{
+      Lp.p1 = strat->S[i];
+      Lp.p2 = p;
+    }
 
     if (
         (!rIsPluralRing(currRing))
@@ -2021,8 +2050,13 @@ void enterOnePairSig (int i, poly p, poly pSig, int, int ecart, int isFromQ, kSt
 
     if (atR >= 0)
     {
+    if(sigCmp==currRing->OrdSgn) {
+      Lp.i_r1 = atR;
+      Lp.i_r2 = strat->S_2_R[i];
+    } else{
       Lp.i_r1 = strat->S_2_R[i];
       Lp.i_r2 = atR;
+    }
     }
     else
     {
@@ -5142,6 +5176,8 @@ BOOLEAN syzCriterionInc(poly sig, unsigned long not_sevSig, kStrategy strat)
 #ifdef F5DEBUG
       printf("COMP %d/%d - MIN %d - MAX %d - SYZL %ld\n",comp,strat->currIdx,min,max,strat->syzl);
       Print("checking with: %d --  ",k);
+      pWrite(pHead(strat->syz[k]));
+      printf("<-- ");
       pWrite(pHead(strat->syz[k]));
 #endif
       if (p_LmShortDivisibleBy(strat->syz[k], strat->sevSyz[k], sig, not_sevSig, currRing))
@@ -8328,7 +8364,6 @@ ring sbaRing (kStrategy strat, const ring r, BOOLEAN /*complete*/, int /*sgn*/)
     for (int i=rBlocks(res); i>0; --i) {
       if (res->order[i] == ringorder_C || res->order[i] == ringorder_c) {
         res->order[i] = 0;
-        break;
       }
     }
     rComplete(res, 1);
