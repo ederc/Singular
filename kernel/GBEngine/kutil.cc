@@ -9538,12 +9538,27 @@ void replaceInLAndSAndT(LObject &p, int tj, kStrategy strat)
 
   /* remove useless pairs from L set */
   for (i = 0; i <= strat->Ll; ++i) {
-    if (strat->L[i].p1 != NULL && pLtCmp(tp, strat->L[i].p1) == 0) {
+    if (strat->L[i].p1 != NULL && pLmDivisibleBy(p.p, strat->L[i].p1)
+      && n_DivBy(pGetCoeff(strat->L[i].p1), pGetCoeff(p.p), currRing->cf)) {
+    /* if (strat->L[i].p1 != NULL && pLtCmp(tp, strat->L[i].p1) == 0) { */
       deleteInL(strat->L, &(strat->Ll), i, strat);
       i--;
       continue;
     }
-    if (strat->L[i].p2 != NULL && pLtCmp(tp, strat->L[i].p2) == 0) {
+    if (strat->L[i].p1 != NULL && pLmDivisibleBy(p.p, strat->L[i].p1)
+      && n_DivBy(pGetCoeff(strat->L[i].p1), pGetCoeff(p.p), currRing->cf)) {
+    /* if (strat->L[i].p2 != NULL && pLtCmp(tp, strat->L[i].p2) == 0) { */
+      deleteInL(strat->L, &(strat->Ll), i, strat);
+      i--;
+      continue;
+    }
+    /* chain criterion */
+    if (strat->L[i].lcm != NULL && pLmDivisibleBy(p.p, strat->L[i].lcm)
+      && n_DivBy(pGetCoeff(strat->L[i].lcm), pGetCoeff(p.p), currRing->cf)) {
+      /* printf("lcm ");
+       * pWrite(pHead(strat->L[i].lcm));
+       * printf("div by ");
+       * pWrite(pHead(tp)); */
       deleteInL(strat->L, &(strat->Ll), i, strat);
       i--;
     }
