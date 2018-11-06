@@ -573,6 +573,7 @@ int redRing_Z (LObject* h,kStrategy strat)
   int at/*,i*/;
   long d;
   int j = 0;
+  int ctr = 0;
   int pass = 0;
   // poly zeroPoly = NULL;
 
@@ -588,7 +589,9 @@ int redRing_Z (LObject* h,kStrategy strat)
     j = kFindDivisibleByInT(strat, h);
     if (j < 0) {
       /* check if a reducer with the same lead monomial exists */
-      j = kFindSameLMInT_Z(strat, h);
+      if (ctr < 2) {
+        j = kFindSameLMInT_Z(strat, h);
+      }
       if (j < 0) {
         /* check if a reducer of the lead monomial exists, by the above
          * check this is a real divisor of the lead monomial */
@@ -638,8 +641,36 @@ int redRing_Z (LObject* h,kStrategy strat)
           ksReducePolyLC(h, &tj, NULL, &rest, strat);
           tj.Delete();
           tj.Clear();
+#if 1
+          // over ZZ: cleanup coefficients by complete reduction with monomials
+          if (rHasLocalOrMixedOrdering(currRing))
+            postReduceByMon(h, strat);
+          if(h->p == NULL)
+          {
+            if (h->lcm!=NULL) pLmDelete(h->lcm);
+            h->Clear();
+            return 0;
+          }
+          if(nIsZero(pGetCoeff(h->p))) return 2;
+          j = kFindDivisibleByInT(strat, h);
+          if(j < 0)
+          {
+            if(strat->tl >= 0)
+              h->i_r1 = strat->tl;
+            else
+              h->i_r1 = -1;
+            if (h->GetLmTailRing() == NULL)
+            {
+              if (h->lcm!=NULL) pLmDelete(h->lcm);
+              h->Clear();
+              return 0;
+            }
+            return 1;
+          }
+#endif
         }
       } else {
+          ctr++;
         /* same lead monomial but lead coefficients do not divide each other:
          * change the polys to h <- spoly(h,tj) and h2 <- gpoly(h,tj). */
         LObject h2  = *h;
