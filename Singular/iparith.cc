@@ -40,6 +40,8 @@
 #include "kernel/oswrapper/timer.h"
 #include "kernel/fglm/fglm.h"
 
+#include "kernel/f4/f4.c"
+
 #include "kernel/GBEngine/kstdfac.h"
 #include "kernel/GBEngine/syz.h"
 #include "kernel/GBEngine/kstd1.h"

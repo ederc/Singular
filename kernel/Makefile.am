@@ -28,7 +28,7 @@ libkernel_la_LDFLAGS = $(SINGULAR_LDFLAGS)
 libkernel_la_includedir=${includedir}/singular/kernel
 libkernel_la_include_HEADERS=$(KERNELHEADERS)
 
-SUBDIRS=numeric fglm groebner_walk combinatorics spectrum linear_algebra maps GBEngine oswrapper
+SUBDIRS=numeric fglm groebner_walk combinatorics spectrum linear_algebra maps GBEngine f4 oswrapper
 
 libkernel_la_LIBADD   = \
 ${builddir}/numeric/libnumeric.la \
@@ -39,6 +39,7 @@ ${builddir}/spectrum/libspectrum.la \
 ${builddir}/linear_algebra/liblinear_algebra.la \
 ${builddir}/maps/libmaps.la \
 ${builddir}/GBEngine/libGBEngine.la \
+${builddir}/f4/libf4.la \
 ${builddir}/oswrapper/liboswrapper.la \
 ${builddir}/libkernelCommon.la
 
